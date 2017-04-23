@@ -133,6 +133,7 @@ impl<'a> JID<'a> {
     }
 }
 
+/// Format the JID in its canonical string form.
 impl<'a> fmt::Display for JID<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.local.len() > 0 && self.resource.len() > 0 {
@@ -144,6 +145,25 @@ impl<'a> fmt::Display for JID<'a> {
     }
 }
 
+/// Create a bare JID from a 2-tuple.
+impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (&'a str, &'a str)) -> result::Result<Self, Self::Error> {
+        JID::new(parts.0, parts.1, "")
+    }
+}
+
+/// Creates a full JID from a 3-tuple.
+impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (&'a str, &'a str, &'a str)) -> result::Result<Self, Self::Error> {
+        JID::new(parts.0, parts.1, parts.2)
+    }
+}
+
+/// Parse a string to create a JID.
 impl<'a> convert::TryFrom<&'a str> for JID<'a> {
     type Error = Error;
 
