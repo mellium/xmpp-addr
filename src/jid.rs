@@ -181,6 +181,32 @@ impl<'a> JID<'a> {
             _ => Some(r),
         }
     }
+
+    /// Constructs a JID from its constituent parts, bypassing safety checks.
+    ///
+    /// # Examples
+    ///
+    /// Constructing an invalid JID:
+    ///
+    /// ```rust
+    /// use xmpp::jid::JID;
+    ///
+    /// unsafe {
+    ///     let j = JID::new_unchecked(r#"/o\"#, "[badip]", "");
+    ///     assert_eq!(j.to_string(), r#"/o\@[badip]"#);
+    /// }
+    /// ```
+    pub unsafe fn new_unchecked<L, D, R>(local: L, domain: D, resource: R) -> JID<'a>
+        where L: Into<borrow::Cow<'a, str>>,
+              D: Into<borrow::Cow<'a, str>>,
+              R: Into<borrow::Cow<'a, str>>
+    {
+        JID {
+            local: local.into(),
+            domain: domain.into(),
+            resource: resource.into(),
+        }
+    }
 }
 
 /// Format the JID in its canonical string form.
