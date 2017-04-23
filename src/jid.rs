@@ -1,3 +1,7 @@
+//! Implements the XMPP Address Format as defined in RFC 7622.
+//!
+//! Historically, XMPP addresses were called "Jabber Identifiers", or JIDs.
+
 use std::borrow;
 use std::convert;
 use std::fmt;
@@ -8,22 +12,46 @@ use std::str::FromStr;
 
 use idna;
 
+/// Possible error values that can occur when parsing JIDs.
 #[derive(Debug)]
 pub enum Error {
+    /// Returned if an empty string is being parsed.
     EmptyJID,
+
+    /// Returned if the localpart is empty (eg. "@example.net").
     EmptyLocal,
+
+    /// Returned if the localpart is longer than 1023 bytes.
     LongLocal,
+
+    /// Returned if the domain part is too short to be a valid domain, hostname, or IP address.
     ShortDomain,
+
+    /// Returned if the domain part is too long to be a valid domain.
     LongDomain,
+
+    /// Returned if the resourcepart is empty (eg. "example.net/"
     EmptyResource,
+
+    /// Returned if the resourcepart is longer than 1023 bytes.
     LongResource,
+
+    /// Returned if a forbidden character was found in any part of the JID.
     ForbiddenChars,
+
+    /// Returned if an error occured while attempting to parse the domainpart of the JID as an IPv6
+    /// address.
     Addr(net::AddrParseError),
+
+    /// Returned if an error occured while performing IDNA2008 processing on the domainpart of the
+    /// JID.
     IDNA(idna::uts46::Errors),
 }
 
+/// A custom result type for JIDs that elides the JID type.
 pub type Result<T> = result::Result<T, Error>;
 
+/// A parsed JID.
 #[derive(Deserialize, Debug, Clone)]
 pub struct JID<'a> {
     local: borrow::Cow<'a, str>,
@@ -32,6 +60,10 @@ pub struct JID<'a> {
 }
 
 impl<'a> JID<'a> {
+    /// Constructs a JID from its constituent parts. The localpart is generally the username of a
+    /// user on a particular server, the domainpart is a domain, hostname, or IP address where the
+    /// user or entity resides, and the resourcepart identifies a specific client. Everything but
+    /// the domain is optional.
     pub fn new<L, D, R>(local: L, domain: D, resource: R) -> Result<JID<'a>>
         where L: Into<borrow::Cow<'a, str>>,
               D: Into<borrow::Cow<'a, str>>,
@@ -77,6 +109,7 @@ impl<'a> JID<'a> {
            })
     }
 
+    /// Returns the localpart of the JID in canonical form.
     pub fn local(&self) -> Option<String> {
         let l: String = self.local.clone().into();
         match l.len() {
@@ -85,10 +118,12 @@ impl<'a> JID<'a> {
         }
     }
 
+    /// Returns the domainpart of the JID in canonical form.
     pub fn domain(&self) -> String {
         self.domain.clone().into()
     }
 
+    /// Returns the resourcepart of the JID in canonical form.
     pub fn resource(&self) -> Option<String> {
         let r: String = self.resource.clone().into();
         match r.len() {
