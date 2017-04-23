@@ -64,6 +64,17 @@ impl<'a> JID<'a> {
     /// user on a particular server, the domainpart is a domain, hostname, or IP address where the
     /// user or entity resides, and the resourcepart identifies a specific client. Everything but
     /// the domain is optional.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// use xmpp::jid::JID;
+    ///
+    /// let j = JID::new("feste", "example.net", "").unwrap();
+    /// assert_eq!(j.to_string(), "feste@example.net");
+    /// ```
     pub fn new<L, D, R>(local: L, domain: D, resource: R) -> Result<JID<'a>>
         where L: Into<borrow::Cow<'a, str>>,
               D: Into<borrow::Cow<'a, str>>,
@@ -110,6 +121,20 @@ impl<'a> JID<'a> {
     }
 
     /// Returns the localpart of the JID in canonical form.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// #![feature(try_from)]
+    /// use std::convert::TryFrom;
+    /// use xmpp::jid::JID;
+    ///
+    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
+    /// assert_eq!(j.local().unwrap(), "mercutio");
+    ///
+    /// let j = JID::try_from("example.net/rp").unwrap();
+    /// assert!(j.local().is_none());
+    /// ```
     pub fn local(&self) -> Option<String> {
         let l: String = self.local.clone().into();
         match l.len() {
@@ -119,11 +144,36 @@ impl<'a> JID<'a> {
     }
 
     /// Returns the domainpart of the JID in canonical form.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// #![feature(try_from)]
+    /// use std::convert::TryFrom;
+    /// use xmpp::jid::JID;
+    ///
+    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
+    /// assert_eq!(j.domain(), "example.net");
+    /// ```
     pub fn domain(&self) -> String {
         self.domain.clone().into()
     }
 
     /// Returns the resourcepart of the JID in canonical form.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// #![feature(try_from)]
+    /// use std::convert::TryFrom;
+    /// use xmpp::jid::JID;
+    ///
+    /// let j = JID::try_from("example.net/rp").unwrap();
+    /// assert_eq!(j.resource().unwrap(), "rp");
+    ///
+    /// let j = JID::try_from("feste@example.net").unwrap();
+    /// assert!(j.resource().is_none());
+    /// ```
     pub fn resource(&self) -> Option<String> {
         let r: String = self.resource.clone().into();
         match r.len() {
