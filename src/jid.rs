@@ -75,13 +75,9 @@ impl<'a> JID<'a> {
     /// let j = JID::new("feste", "example.net", "").unwrap();
     /// assert_eq!(j.to_string(), "feste@example.net");
     /// ```
-    pub fn new<L, D, R>(local: L, domain: D, resource: R) -> Result<JID<'a>>
-        where L: Into<borrow::Cow<'a, str>>,
-              D: Into<borrow::Cow<'a, str>>,
-              R: Into<borrow::Cow<'a, str>>
-    {
+    pub fn new(local: &'a str, domain: &'a str, resource: &'a str) -> Result<JID<'a>> {
 
-        let (dlabel, result) = idna::domain_to_unicode(&(domain.into()));
+        let (dlabel, result) = idna::domain_to_unicode(domain);
         match result {
             Ok(_) => {}
             Err(e) => {
@@ -98,8 +94,7 @@ impl<'a> JID<'a> {
             }
         }
 
-        let l = local.into();
-        if l.len() > 1023 {
+        if local.len() > 1023 {
             return Err(Error::LongLocal);
         }
         if dlabel.len() > 1023 {
@@ -108,15 +103,14 @@ impl<'a> JID<'a> {
         if dlabel.len() < 1 {
             return Err(Error::ShortDomain);
         }
-        let r = resource.into();
-        if r.len() > 1023 {
+        if resource.len() > 1023 {
             return Err(Error::LongResource);
         }
 
         Ok(JID {
-               local: l,
-               domain: borrow::Cow::from(dlabel),
-               resource: r,
+               local: local.into(),
+               domain: dlabel.into(),
+               resource: resource.into(),
            })
     }
 
@@ -196,11 +190,7 @@ impl<'a> JID<'a> {
     ///     assert_eq!(j.to_string(), r#"/o\@[badip]"#);
     /// }
     /// ```
-    pub unsafe fn new_unchecked<L, D, R>(local: L, domain: D, resource: R) -> JID<'a>
-        where L: Into<borrow::Cow<'a, str>>,
-              D: Into<borrow::Cow<'a, str>>,
-              R: Into<borrow::Cow<'a, str>>
-    {
+    pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> JID<'a> {
         JID {
             local: local.into(),
             domain: domain.into(),
