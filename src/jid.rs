@@ -1,6 +1,9 @@
 //! Implements the XMPP Address Format as defined in RFC 7622.
 //!
 //! Historically, XMPP addresses were called "Jabber Identifiers", or JIDs.
+//!
+//! **Note well** that this package currently isn't fully compliant with RFC 7622; it does not
+//! perform the PRECIS (RFC 7564) enforcement step.
 
 use std::borrow;
 use std::convert;
