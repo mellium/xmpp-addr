@@ -1,0 +1,14 @@
+[package]
+name = "jid"
+version = "0.1.0"
+authors = ["Sam Whited <sam@samwhited.com>"]
+license = "BSD-2-clause"
+description = "An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622."
+repository = "https://bitbucket.org/mellium/xmpp-rs"
+readme = "README.md"
+
+[dependencies]
+idna = "0.1"
+serde = "0.9"
+serde_derive = "0.9"
+serde-xml-rs = "0.1"
