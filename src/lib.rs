@@ -6,5 +6,5 @@ extern crate serde_xml_rs;
 
 extern crate idna;
 
-mod jid;
+pub mod jid;
 pub use jid::JID;
