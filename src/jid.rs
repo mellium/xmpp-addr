@@ -259,8 +259,7 @@ impl<'a> convert::TryFrom<&'a str> for JID<'a> {
 
         let mut chars = s.char_indices();
         let sep = chars.find(|&c| match c {
-                                 (_, '@') => true,
-                                 (_, '/') => true,
+                                 (_, '@') | (_, '/') => true,
                                  _ => false,
                              });
 
