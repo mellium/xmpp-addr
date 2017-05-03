@@ -1,7 +1,7 @@
 #![feature(try_from)]
 
-extern crate xmpp;
-use xmpp::JID;
+extern crate xmpp_jid;
+use xmpp_jid::JID;
 
 use std::convert::TryFrom;
 

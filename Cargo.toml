@@ -1,11 +1,14 @@
 [package]
-name = "xmpp"
+name = "xmpp-jid"
 version = "0.1.0"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "BSD-2-clause"
-description = "An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622. Eventually this may become a full XMPP implementation."
-repository = "https://bitbucket.org/mellium/xmpp-rs"
+description = "An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622."
+repository = "https://bitbucket.org/mellium/xmpp-jid-rs"
 readme = "README.md"
+keywords = ["xmpp", "jabber", "jid", "rfc7622", "rfc6120"]
+documentation = "https://docs.rs/xmpp-jid"
+categories = []
 
 exclude = [
     "bitbucket-pipelines.yml",
@@ -15,4 +18,3 @@ exclude = [
 idna = "0.1"
 serde = "1.0"
 serde_derive = "1.0"
-serde-xml-rs = "0.1"
