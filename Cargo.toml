@@ -7,6 +7,10 @@ description = "An implementation of the XMPP Address format (Jabber ID) defined 
 repository = "https://bitbucket.org/mellium/xmpp-rs"
 readme = "README.md"
 
+exclude = [
+    "bitbucket-pipelines.yml",
+]
+
 [dependencies]
 idna = "0.1"
 serde = "1.0"
