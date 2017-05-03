@@ -1,6 +1,6 @@
 [package]
 name = "xmpp-jid"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "BSD-2-Clause"
 description = "An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622."

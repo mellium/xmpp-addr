@@ -3,7 +3,8 @@
 //! Historically, XMPP addresses were called "Jabber Identifiers", or JIDs.
 //!
 //! **Note well** that this package currently isn't fully compliant with RFC 7622; it does not
-//! perform the PRECIS (RFC 7564) enforcement step.
+//! perform the PRECIS (RFC 7564) enforcement step and it only compiles on nightly versions of
+//! Rust.
 //!
 //! # Examples
 //!
@@ -32,7 +33,7 @@
 #![deny(missing_docs)]
 #![feature(try_from)]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.1")]
 
 extern crate idna;
 
