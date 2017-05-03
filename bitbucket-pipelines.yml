@@ -3,18 +3,17 @@ clone:
   depth: 1
 
 pipelines:
-  branches:
-    master:
-      - step:
-          script:
-            - echo "Update Rustup"          ; rustup self update
-            - echo "Update Rust toolchains" ; rustup update
-            - echo "Use nightly toolchain"  ; rustup default nightly
-            - echo "Show Rust toolchain"    ; rustup show && rustc --version
-            - echo "Run unit tests"         ; cargo test --lib --release -v --no-fail-fast -- --nocapture --test
-            - echo "Building docs"          ; cargo doc --all-features --release
-  custom:
-    publish-crate:
+  default:
+    - step:
+        script:
+          - echo "Update Rustup"          ; rustup self update
+          - echo "Update Rust toolchains" ; rustup update
+          - echo "Use nightly toolchain"  ; rustup default nightly
+          - echo "Show Rust toolchain"    ; rustup show && rustc --version
+          - echo "Run unit tests"         ; cargo test --lib --release -v --no-fail-fast -- --nocapture --test
+          - echo "Building docs"          ; cargo doc --all-features --release
+  tags:
+    v*:
       - step:
           script:
             - cargo package
