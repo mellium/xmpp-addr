@@ -17,5 +17,10 @@ pipelines:
     v*:
       - step:
           script:
-            - cargo package
-            - cargo publish --token ${CARGO_API_KEY}
+            - echo "Update Rustup"          ; rustup self update
+            - echo "Update Rust toolchains" ; rustup update
+            - echo "Use nightly toolchain"  ; rustup default nightly
+            - echo "Show Rust toolchain"    ; rustup show && rustc --version
+            - echo "Run unit tests"         ; cargo test --lib --release -v --no-fail-fast -- --nocapture --test
+            - echo "Building docs"          ; cargo doc --all-features --release
+            - echo "Publishing crate"       ; cargo publish --token ${CARGO_API_KEY}
