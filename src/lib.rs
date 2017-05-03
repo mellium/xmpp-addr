@@ -32,7 +32,7 @@
 #![deny(missing_docs)]
 #![feature(try_from)]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.1.1")]
 
 #[macro_use]
 extern crate serde_derive;
