@@ -7,7 +7,7 @@ description = """
 An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622.
 Currently only compiles on nightly versions of Rust.
 """
-repository = "https://bitbucket.org/mellium/xmpp-jid-rs"
+repository = "https://bitbucket.org/mellium/xmpp-jid/src/"
 readme = "README.md"
 keywords = ["xmpp", "jabber", "jid", "rfc7622", "rfc6120"]
 documentation = "https://docs.rs/xmpp-jid"
