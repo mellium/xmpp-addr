@@ -32,10 +32,7 @@
 #![deny(missing_docs)]
 #![feature(try_from)]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.1.1")]
-
-#[macro_use]
-extern crate serde_derive;
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.0")]
 
 extern crate idna;
 
@@ -87,7 +84,7 @@ pub enum Error {
 pub type Result<T> = result::Result<T, Error>;
 
 /// A parsed JID.
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct JID<'a> {
     local: borrow::Cow<'a, str>,
     domain: borrow::Cow<'a, str>,

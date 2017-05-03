@@ -1,6 +1,6 @@
 [package]
 name = "xmpp-jid"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "BSD-2-Clause"
 description = "An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622."
@@ -16,5 +16,3 @@ exclude = [
 
 [dependencies]
 idna = "0.1"
-serde = "1.0"
-serde_derive = "1.0"
