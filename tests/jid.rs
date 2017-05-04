@@ -1,8 +1,10 @@
-#![feature(try_from)]
+#![cfg_attr(not(feature = "stable"), feature(try_from))]
 
 extern crate xmpp_jid;
 use xmpp_jid::JID;
 
+
+#[cfg(not(feature = "stable"))]
 use std::convert::TryFrom;
 
 macro_rules! test_valid_jids {
@@ -11,7 +13,12 @@ macro_rules! test_valid_jids {
             #[test]
             fn $num() {
                 let v = vec![$jid, $local, $domain, $res];
+
+                #[cfg(not(feature = "stable"))]
                 let jid = JID::try_from(v[0]);
+                #[cfg(feature = "stable")]
+                let jid = JID::parse(v[0]);
+
                 match jid {
                     Err(e) => panic!(e),
                     Ok(j) => {
@@ -36,7 +43,10 @@ macro_rules! test_invalid_jids {
         $(
             #[test]
             fn $num() {
+                #[cfg(not(feature = "stable"))]
                 let jid = JID::try_from($jid);
+                #[cfg(feature = "stable")]
+                let jid = JID::parse($jid);
                 match jid {
                     Err(_) => {}
                     Ok(_) => {

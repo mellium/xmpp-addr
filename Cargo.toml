@@ -17,5 +17,11 @@ exclude = [
     "bitbucket-pipelines.yml",
 ]
 
+[features]
+default = ["stable"]
+
+# Use only stable APIs (eg. don't build with TryFrom)
+stable = []
+
 [dependencies]
 idna = "0.1"

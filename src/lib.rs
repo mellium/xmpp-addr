@@ -23,7 +23,8 @@
 //!
 //! ## Parsing (nightly)
 //!
-//! ```rust
+//! #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+//! #[cfg_attr(not(feature = "stable"), doc = "```rust")]
 //! #![feature(try_from)]
 //! use std::convert::TryFrom;
 //! use xmpp_jid::JID;
@@ -35,14 +36,17 @@
 //! ```
 
 #![deny(missing_docs)]
-#![feature(try_from)]
+
+#![cfg_attr(not(feature = "stable"), feature(try_from))]
 
 #![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.5")]
 
 extern crate idna;
 
-use std::borrow;
+#[cfg(not(feature = "stable"))]
 use std::convert;
+
+use std::borrow;
 use std::fmt;
 use std::net;
 use std::result;
@@ -151,163 +155,8 @@ impl<'a> JID<'a> {
            })
     }
 
-    /// Returns the localpart of the JID in canonical form.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// #![feature(try_from)]
-    /// use std::convert::TryFrom;
-    /// use xmpp_jid::JID;
-    ///
-    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
-    /// assert_eq!(j.local().unwrap(), "mercutio");
-    ///
-    /// let j = JID::try_from("example.net/rp").unwrap();
-    /// assert!(j.local().is_none());
-    /// ```
-    pub fn local(&self) -> Option<String> {
-        let l: String = self.local.clone().into();
-        match l.len() {
-            0 => None,
-            _ => Some(l),
-        }
-    }
-
-    /// Returns the domainpart of the JID in canonical form.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// #![feature(try_from)]
-    /// use std::convert::TryFrom;
-    /// use xmpp_jid::JID;
-    ///
-    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
-    /// assert_eq!(j.domain(), "example.net");
-    /// ```
-    pub fn domain(&self) -> String {
-        self.domain.clone().into()
-    }
-
-    /// Returns the resourcepart of the JID in canonical form.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// #![feature(try_from)]
-    /// use std::convert::TryFrom;
-    /// use xmpp_jid::JID;
-    ///
-    /// let j = JID::try_from("example.net/rp").unwrap();
-    /// assert_eq!(j.resource().unwrap(), "rp");
-    ///
-    /// let j = JID::try_from("feste@example.net").unwrap();
-    /// assert!(j.resource().is_none());
-    /// ```
-    pub fn resource(&self) -> Option<String> {
-        let r: String = self.resource.clone().into();
-        match r.len() {
-            0 => None,
-            _ => Some(r),
-        }
-    }
-
-    /// Constructs a JID from its constituent parts, bypassing safety checks.
-    ///
-    /// # Examples
-    ///
-    /// Constructing an invalid JID:
-    ///
-    /// ```rust
-    /// use xmpp_jid::JID;
-    ///
-    /// unsafe {
-    ///     let j = JID::new_unchecked(r#"/o\"#, "[badip]", "");
-    ///     assert_eq!(j.to_string(), r#"/o\@[badip]"#);
-    /// }
-    /// ```
-    pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> JID<'a> {
-        JID {
-            local: local.into(),
-            domain: domain.into(),
-            resource: resource.into(),
-        }
-    }
-}
-
-/// Format the JID in its canonical string form.
-impl<'a> fmt::Display for JID<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.local.len() > 0 && self.resource.len() > 0 {
-            return write!(f, "{}@{}/{}", self.local, self.domain, self.resource);
-        } else if self.local.len() > 0 {
-            return write!(f, "{}@{}", self.local, self.domain);
-        }
-        write!(f, "{}/{}", self.domain, self.resource)
-    }
-}
-
-/// Create a bare JID from a 2-tuple.
-///
-/// # Examples
-///
-/// ```rust
-/// #![feature(try_from)]
-/// use std::convert::TryFrom;
-/// use xmpp_jid::JID;
-///
-/// let j = JID::try_from(("mercutio", "example.net")).unwrap();
-/// let j2 = JID::try_from("mercutio@example.net").unwrap();
-/// assert_eq!(j, j2);
-/// ```
-impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
-    type Error = Error;
-
-    fn try_from(parts: (&'a str, &'a str)) -> result::Result<Self, Self::Error> {
-        JID::new(parts.0, parts.1, "")
-    }
-}
-
-/// Creates a full JID from a 3-tuple.
-///
-/// # Examples
-///
-/// ```rust
-/// #![feature(try_from)]
-/// use std::convert::TryFrom;
-/// use xmpp_jid::JID;
-///
-/// let j = JID::try_from(("mercutio", "example.net", "nctYeCzm")).unwrap();
-/// let j2 = JID::try_from("mercutio@example.net/nctYeCzm").unwrap();
-/// assert_eq!(j, j2);
-/// ```
-impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
-    type Error = Error;
-
-    fn try_from(parts: (&'a str, &'a str, &'a str)) -> result::Result<Self, Self::Error> {
-        JID::new(parts.0, parts.1, parts.2)
-    }
-}
-
-/// Parse a string to create a JID.
-///
-/// # Examples
-///
-/// ```rust
-/// #![feature(try_from)]
-/// use std::convert::TryFrom;
-/// use xmpp_jid::JID;
-///
-/// let j = JID::try_from("example.net/rp").unwrap();
-/// assert!(j.local().is_none());
-/// assert_eq!(j.domain(), "example.net");
-/// assert_eq!(j.resource().unwrap(), "rp");
-/// ```
-impl<'a> convert::TryFrom<&'a str> for JID<'a> {
-    type Error = Error;
-
-    fn try_from(s: &'a str) -> result::Result<Self, Self::Error> {
+    /// Parse a string to create a JID.
+    pub fn parse(s: &'a str) -> Result<JID<'a>> {
         if s == "" {
             return Err(Error::EmptyJID);
         }
@@ -391,5 +240,174 @@ impl<'a> convert::TryFrom<&'a str> for JID<'a> {
         //    character MUST be stripped before any other canonicalization steps
         //    are taken.
         JID::new(lpart, dpart.trim_right_matches('.'), rpart)
+    }
+
+    /// Returns the localpart of the JID in canonical form.
+    ///
+    /// # Examples
+    ///
+    /// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+    /// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+    /// #![feature(try_from)]
+    /// use std::convert::TryFrom;
+    /// use xmpp_jid::JID;
+    ///
+    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
+    /// assert_eq!(j.local().unwrap(), "mercutio");
+    ///
+    /// let j = JID::try_from("example.net/rp").unwrap();
+    /// assert!(j.local().is_none());
+    /// ```
+    pub fn local(&self) -> Option<String> {
+        let l: String = self.local.clone().into();
+        match l.len() {
+            0 => None,
+            _ => Some(l),
+        }
+    }
+
+    /// Returns the domainpart of the JID in canonical form.
+    ///
+    /// # Examples
+    ///
+    /// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+    /// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+    /// #![feature(try_from)]
+    /// use std::convert::TryFrom;
+    /// use xmpp_jid::JID;
+    ///
+    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
+    /// assert_eq!(j.domain(), "example.net");
+    /// ```
+    pub fn domain(&self) -> String {
+        self.domain.clone().into()
+    }
+
+    /// Returns the resourcepart of the JID in canonical form.
+    ///
+    /// # Examples
+    ///
+    /// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+    /// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+    /// #![feature(try_from)]
+    /// use std::convert::TryFrom;
+    /// use xmpp_jid::JID;
+    ///
+    /// let j = JID::try_from("example.net/rp").unwrap();
+    /// assert_eq!(j.resource().unwrap(), "rp");
+    ///
+    /// let j = JID::try_from("feste@example.net").unwrap();
+    /// assert!(j.resource().is_none());
+    /// ```
+    pub fn resource(&self) -> Option<String> {
+        let r: String = self.resource.clone().into();
+        match r.len() {
+            0 => None,
+            _ => Some(r),
+        }
+    }
+
+    /// Constructs a JID from its constituent parts, bypassing safety checks.
+    ///
+    /// # Examples
+    ///
+    /// Constructing an invalid JID:
+    ///
+    /// ```rust
+    /// use xmpp_jid::JID;
+    ///
+    /// unsafe {
+    ///     let j = JID::new_unchecked(r#"/o\"#, "[badip]", "");
+    ///     assert_eq!(j.to_string(), r#"/o\@[badip]"#);
+    /// }
+    /// ```
+    pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> JID<'a> {
+        JID {
+            local: local.into(),
+            domain: domain.into(),
+            resource: resource.into(),
+        }
+    }
+}
+
+/// Format the JID in its canonical string form.
+impl<'a> fmt::Display for JID<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.local.len() > 0 && self.resource.len() > 0 {
+            return write!(f, "{}@{}/{}", self.local, self.domain, self.resource);
+        } else if self.local.len() > 0 {
+            return write!(f, "{}@{}", self.local, self.domain);
+        }
+        write!(f, "{}/{}", self.domain, self.resource)
+    }
+}
+
+/// Create a bare JID from a 2-tuple.
+///
+/// # Examples
+///
+/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from(("mercutio", "example.net")).unwrap();
+/// let j2 = JID::try_from("mercutio@example.net").unwrap();
+/// assert_eq!(j, j2);
+/// ```
+#[cfg(not(feature = "stable"))]
+impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (&'a str, &'a str)) -> result::Result<Self, Self::Error> {
+        JID::new(parts.0, parts.1, "")
+    }
+}
+
+/// Creates a full JID from a 3-tuple.
+///
+/// # Examples
+///
+/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from(("mercutio", "example.net", "nctYeCzm")).unwrap();
+/// let j2 = JID::try_from("mercutio@example.net/nctYeCzm").unwrap();
+/// assert_eq!(j, j2);
+/// ```
+#[cfg(not(feature = "stable"))]
+impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (&'a str, &'a str, &'a str)) -> result::Result<Self, Self::Error> {
+        JID::new(parts.0, parts.1, parts.2)
+    }
+}
+
+/// Parse a string to create a JID.
+///
+/// # Examples
+///
+/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from("example.net/rp").unwrap();
+/// assert!(j.local().is_none());
+/// assert_eq!(j.domain(), "example.net");
+/// assert_eq!(j.resource().unwrap(), "rp");
+/// ```
+#[cfg(not(feature = "stable"))]
+impl<'a> convert::TryFrom<&'a str> for JID<'a> {
+    type Error = Error;
+
+    fn try_from(s: &'a str) -> result::Result<Self, Self::Error> {
+        JID::parse(s)
     }
 }
