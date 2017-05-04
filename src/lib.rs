@@ -18,7 +18,7 @@
 //! use xmpp_jid::JID;
 //!
 //! let j = JID::new("feste", "example.net", "").unwrap();
-//! assert_eq!(j.to_string(), "feste@example.net");
+//! assert_eq!(j, "feste@example.net");
 //! ```
 //!
 //! ## Parsing (nightly)
@@ -47,6 +47,7 @@ extern crate idna;
 use std::convert;
 
 use std::borrow;
+use std::cmp;
 use std::fmt;
 use std::net;
 use std::result;
@@ -114,7 +115,7 @@ impl<'a> JID<'a> {
     /// use xmpp_jid::JID;
     ///
     /// let j = JID::new("feste", "example.net", "").unwrap();
-    /// assert_eq!(j.to_string(), "feste@example.net");
+    /// assert_eq!(j, "feste@example.net");
     /// ```
     pub fn new(local: &'a str, domain: &'a str, resource: &'a str) -> Result<JID<'a>> {
 
@@ -153,6 +154,42 @@ impl<'a> JID<'a> {
                domain: dlabel.into(),
                resource: resource.into(),
            })
+    }
+
+    /// Construct a JID containing only a domain part.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// use xmpp_jid::JID;
+    ///
+    /// let j = JID::from_domain("example.net").unwrap();
+    /// assert_eq!(j, "example.net");
+    /// ```
+    pub fn from_domain(domain: &'a str) -> Result<JID<'a>> {
+        JID::new("", domain, "")
+    }
+
+    /// Consumes a JID to construct a bare JID (a JID without a resourcepart) from an existing JID.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// use xmpp_jid::JID;
+    ///
+    /// let j = JID::new("feste", "example.net", "res").unwrap();
+    /// assert_eq!(j.bare(), "feste@example.net");
+    /// ```
+    pub fn bare(self) -> JID<'a> {
+        JID {
+            local: self.local,
+            domain: self.domain,
+            resource: "".into(),
+        }
     }
 
     /// Parse a string to create a JID.
@@ -318,7 +355,7 @@ impl<'a> JID<'a> {
     ///
     /// unsafe {
     ///     let j = JID::new_unchecked(r#"/o\"#, "[badip]", "");
-    ///     assert_eq!(j.to_string(), r#"/o\@[badip]"#);
+    ///     assert_eq!(j, r#"/o\@[badip]"#);
     /// }
     /// ```
     pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> JID<'a> {
@@ -409,5 +446,37 @@ impl<'a> convert::TryFrom<&'a str> for JID<'a> {
 
     fn try_from(s: &'a str) -> result::Result<Self, Self::Error> {
         JID::parse(s)
+    }
+}
+
+/// Allows JIDs to be compared with strings.
+///
+/// *This may be expensive*. The canonical string representation of the JID is first converted into
+/// a string and compared for bit-string-identity with the provided string (byte-wise compare). If
+/// the string does not match, it is then canonicalized itself and compared again.
+/// If constructing a canonical JID from the string fails, the comparison always fails (even if the
+/// JID itself is otherwise valid. Unsafe comparisons should convert the JID to a string and
+/// compare strings themselves.
+///
+/// # Examples
+///
+/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
+/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from("example.net/rp").unwrap();
+/// assert!(j == "example.net/rp");
+/// ```
+impl<'a, 'b> cmp::PartialEq<&'a str> for JID<'b> {
+    fn eq(&self, other: &&str) -> bool {
+        if self.to_string() == *other {
+            return true;
+        }
+        match JID::parse(*other) {
+            Ok(j) => j.eq(self),
+            Err(_) => false,
+        }
     }
 }
