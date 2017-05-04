@@ -23,8 +23,8 @@
 //!
 //! ## Parsing (nightly)
 //!
-//! #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-//! #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+#![cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#![cfg_attr(not(feature = "stable"), doc = " ```rust")]
 //! #![feature(try_from)]
 //! use std::convert::TryFrom;
 //! use xmpp_jid::JID;
@@ -283,8 +283,8 @@ impl<'a> JID<'a> {
     ///
     /// # Examples
     ///
-    /// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-    /// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+    #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+    #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
     /// #![feature(try_from)]
     /// use std::convert::TryFrom;
     /// use xmpp_jid::JID;
@@ -307,8 +307,8 @@ impl<'a> JID<'a> {
     ///
     /// # Examples
     ///
-    /// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-    /// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+    #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+    #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
     /// #![feature(try_from)]
     /// use std::convert::TryFrom;
     /// use xmpp_jid::JID;
@@ -324,8 +324,8 @@ impl<'a> JID<'a> {
     ///
     /// # Examples
     ///
-    /// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-    /// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+    #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+    #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
     /// #![feature(try_from)]
     /// use std::convert::TryFrom;
     /// use xmpp_jid::JID;
@@ -383,8 +383,8 @@ impl<'a> fmt::Display for JID<'a> {
 ///
 /// # Examples
 ///
-/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
 /// use std::convert::TryFrom;
 /// use xmpp_jid::JID;
@@ -406,8 +406,8 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
 ///
 /// # Examples
 ///
-/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
 /// use std::convert::TryFrom;
 /// use xmpp_jid::JID;
@@ -429,8 +429,8 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
 ///
 /// # Examples
 ///
-/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
 /// use std::convert::TryFrom;
 /// use xmpp_jid::JID;
@@ -460,8 +460,8 @@ impl<'a> convert::TryFrom<&'a str> for JID<'a> {
 ///
 /// # Examples
 ///
-/// #[cfg_attr(feature = "stable", doc = "```rust,no_run")]
-/// #[cfg_attr(not(feature = "stable"), doc = "```rust")]
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
 /// use std::convert::TryFrom;
 /// use xmpp_jid::JID;
