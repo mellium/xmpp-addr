@@ -89,7 +89,7 @@ pub enum Error {
 pub type Result<T> = result::Result<T, Error>;
 
 /// A parsed JID.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct JID<'a> {
     local: borrow::Cow<'a, str>,
     domain: borrow::Cow<'a, str>,
@@ -249,6 +249,18 @@ impl<'a> fmt::Display for JID<'a> {
 }
 
 /// Create a bare JID from a 2-tuple.
+///
+/// # Examples
+///
+/// ```rust
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from(("mercutio", "example.net")).unwrap();
+/// let j2 = JID::try_from("mercutio@example.net").unwrap();
+/// assert_eq!(j, j2);
+/// ```
 impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
     type Error = Error;
 
@@ -258,6 +270,18 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
 }
 
 /// Creates a full JID from a 3-tuple.
+///
+/// # Examples
+///
+/// ```rust
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from(("mercutio", "example.net", "nctYeCzm")).unwrap();
+/// let j2 = JID::try_from("mercutio@example.net/nctYeCzm").unwrap();
+/// assert_eq!(j, j2);
+/// ```
 impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
     type Error = Error;
 
@@ -267,6 +291,19 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
 }
 
 /// Parse a string to create a JID.
+///
+/// # Examples
+///
+/// ```rust
+/// #![feature(try_from)]
+/// use std::convert::TryFrom;
+/// use xmpp_jid::JID;
+///
+/// let j = JID::try_from("example.net/rp").unwrap();
+/// assert!(j.local().is_none());
+/// assert_eq!(j.domain(), "example.net");
+/// assert_eq!(j.resource().unwrap(), "rp");
+/// ```
 impl<'a> convert::TryFrom<&'a str> for JID<'a> {
     type Error = Error;
 
