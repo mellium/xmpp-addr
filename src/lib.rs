@@ -37,7 +37,7 @@
 #![deny(missing_docs)]
 #![feature(try_from)]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.4")]
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.5")]
 
 extern crate idna;
 
