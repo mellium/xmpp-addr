@@ -21,6 +21,17 @@
 //! assert_eq!(j, "feste@example.net");
 //! ```
 //!
+//! ## Parsing (stable)
+//!
+//! ```rust
+//! use xmpp_jid::JID;
+//!
+//! let j = JID::parse("juliet@example.net/balcony").unwrap();
+//! assert_eq!(j.local().unwrap(), "juliet");
+//! assert_eq!(j.domain(), "example.net");
+//! assert_eq!(j.resource().unwrap(), "balcony");
+//! ```
+//!
 //! ## Parsing (nightly)
 //!
 #![cfg_attr(feature = "stable", doc = " ```rust,ignore")]
@@ -283,16 +294,13 @@ impl<'a> JID<'a> {
     ///
     /// # Examples
     ///
-    #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-    #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
-    /// #![feature(try_from)]
-    /// use std::convert::TryFrom;
+    /// ```rust
     /// use xmpp_jid::JID;
     ///
-    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
+    /// let j = JID::parse("mercutio@example.net/rp").unwrap();
     /// assert_eq!(j.local().unwrap(), "mercutio");
     ///
-    /// let j = JID::try_from("example.net/rp").unwrap();
+    /// let j = JID::parse("example.net/rp").unwrap();
     /// assert!(j.local().is_none());
     /// ```
     pub fn local(&self) -> Option<String> {
@@ -307,13 +315,10 @@ impl<'a> JID<'a> {
     ///
     /// # Examples
     ///
-    #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-    #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
-    /// #![feature(try_from)]
-    /// use std::convert::TryFrom;
+    /// ```rust
     /// use xmpp_jid::JID;
     ///
-    /// let j = JID::try_from("mercutio@example.net/rp").unwrap();
+    /// let j = JID::parse("mercutio@example.net/rp").unwrap();
     /// assert_eq!(j.domain(), "example.net");
     /// ```
     pub fn domain(&self) -> String {
@@ -324,16 +329,13 @@ impl<'a> JID<'a> {
     ///
     /// # Examples
     ///
-    #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-    #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
-    /// #![feature(try_from)]
-    /// use std::convert::TryFrom;
+    /// ```rust
     /// use xmpp_jid::JID;
     ///
-    /// let j = JID::try_from("example.net/rp").unwrap();
+    /// let j = JID::parse("example.net/rp").unwrap();
     /// assert_eq!(j.resource().unwrap(), "rp");
     ///
-    /// let j = JID::try_from("feste@example.net").unwrap();
+    /// let j = JID::parse("feste@example.net").unwrap();
     /// assert!(j.resource().is_none());
     /// ```
     pub fn resource(&self) -> Option<String> {
