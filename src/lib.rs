@@ -451,32 +451,93 @@ impl<'a> convert::TryFrom<&'a str> for JID<'a> {
 
 /// Allows JIDs to be compared with strings.
 ///
-/// *This may be expensive*. The canonical string representation of the JID is first converted into
-/// a string and compared for bit-string-identity with the provided string (byte-wise compare). If
-/// the string does not match, it is then canonicalized itself and compared again.
-/// If constructing a canonical JID from the string fails, the comparison always fails (even if the
+/// **This may be expensive**. The canonical string representation of the JID is first converted
+/// into a string and compared for bit-string-identity with the provided string (byte-wise
+/// compare). If the string does not match, it is then canonicalized itself and compared again. If
+/// constructing a canonical JID from the string fails, the comparison always fails (even if the
 /// JID itself is otherwise valid. Unsafe comparisons should convert the JID to a string and
 /// compare strings themselves.
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
-/// #![feature(try_from)]
-/// use std::convert::TryFrom;
+/// ```rust
 /// use xmpp_jid::JID;
 ///
-/// let j = JID::try_from("example.net/rp").unwrap();
+/// let j = JID::parse("example.net/rp").unwrap();
 /// assert!(j == "example.net/rp");
 /// ```
-impl<'a, 'b> cmp::PartialEq<&'a str> for JID<'b> {
-    fn eq(&self, other: &&str) -> bool {
-        if self.to_string() == *other {
+impl<'a> cmp::PartialEq<str> for JID<'a> {
+    fn eq(&self, other: &str) -> bool {
+        if self.to_string() == other {
             return true;
         }
-        match JID::parse(*other) {
+        match JID::parse(other) {
             Ok(j) => j.eq(self),
             Err(_) => false,
         }
     }
 }
+
+/// Allows JIDs to be compared with strings.
+///
+/// **This may be expensive**. The canonical string representation of the JID is first converted
+/// into a string and compared for bit-string-identity with the provided string (byte-wise
+/// compare). If the string does not match, it is then canonicalized itself and compared again. If
+/// constructing a canonical JID from the string fails, the comparison always fails (even if the
+/// JID itself is otherwise valid. Unsafe comparisons should convert the JID to a string and
+/// compare strings themselves.
+///
+/// # Examples
+///
+/// ```rust
+/// use xmpp_jid::JID;
+///
+/// let j = JID::parse("example.net/rp").unwrap();
+/// assert!("example.net/rp" == j);
+/// ```
+impl<'a> cmp::PartialEq<JID<'a>> for str {
+    fn eq(&self, other: &JID<'a>) -> bool {
+        PartialEq::eq(other, self)
+    }
+}
+
+// Macro from collections::strings
+macro_rules! impl_eq {
+    ($lhs:ty, $rhs: ty) => {
+
+        /// Allows JIDs to be compared with strings.
+        ///
+        /// **This may be expensive**. The canonical string representation of the JID is first
+        /// converted into a string and compared for bit-string-identity with the provided string
+        /// (byte-wise compare). If the string does not match, it is then canonicalized itself and
+        /// compared again.  If constructing a canonical JID from the string fails, the comparison
+        /// always fails (even if the JID itself is otherwise valid. Unsafe comparisons should
+        /// convert the JID to a string and compare strings themselves.
+        impl<'a, 'b> PartialEq<$lhs> for $rhs {
+            #[inline]
+            fn eq(&self, other: &$lhs) -> bool { PartialEq::eq(self, &other[..]) }
+            #[inline]
+            fn ne(&self, other: &$lhs) -> bool { PartialEq::ne(self, &other[..]) }
+        }
+
+        /// Allows JIDs to be compared with strings.
+        ///
+        /// **This may be expensive**. The canonical string representation of the JID is first
+        /// converted into a string and compared for bit-string-identity with the provided string
+        /// (byte-wise compare). If the string does not match, it is then canonicalized itself and
+        /// compared again.  If constructing a canonical JID from the string fails, the comparison
+        /// always fails (even if the JID itself is otherwise valid. Unsafe comparisons should
+        /// convert the JID to a string and compare strings themselves.
+        impl<'a, 'b> PartialEq<$rhs> for $lhs {
+            #[inline]
+            fn eq(&self, other: &$rhs) -> bool { PartialEq::eq(&self[..], other) }
+            #[inline]
+            fn ne(&self, other: &$rhs) -> bool { PartialEq::ne(&self[..], other) }
+        }
+
+    }
+}
+
+impl_eq! { borrow::Cow<'b, str>, JID<'a> }
+impl_eq! { &'b str, JID<'a> }
+impl_eq! { String, JID<'a> }
