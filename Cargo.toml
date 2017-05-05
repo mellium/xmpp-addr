@@ -1,6 +1,6 @@
 [package]
 name = "xmpp-jid"
-version = "0.2.5"
+version = "0.3.0"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "BSD-2-Clause"
 description = """

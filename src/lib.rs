@@ -49,7 +49,7 @@
 
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.2.5")]
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.3.0")]
 
 extern crate idna;
 
