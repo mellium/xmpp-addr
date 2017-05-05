@@ -15,8 +15,7 @@
 //! ## Basic usage
 //!
 //! ```rust
-//! use xmpp_jid::JID;
-//!
+//! # use xmpp_jid::JID;
 //! let j = JID::new("feste", "example.net", "").unwrap();
 //! assert_eq!(j, "feste@example.net");
 //! ```
@@ -24,8 +23,7 @@
 //! ## Parsing (stable)
 //!
 //! ```rust
-//! use xmpp_jid::JID;
-//!
+//! # use xmpp_jid::JID;
 //! let j = JID::parse("juliet@example.net/balcony").unwrap();
 //! assert_eq!(j.local().unwrap(), "juliet");
 //! assert_eq!(j.domain(), "example.net");
@@ -37,13 +35,14 @@
 #![cfg_attr(feature = "stable", doc = " ```rust,ignore")]
 #![cfg_attr(not(feature = "stable"), doc = " ```rust")]
 //! #![feature(try_from)]
-//! use std::convert::TryFrom;
-//! use xmpp_jid::JID;
+//! # use std::convert::{ TryInto, TryFrom };
+//! # use xmpp_jid::JID;
+//!
+//! let j: JID = "orsino@example.net/ilyria".try_into().unwrap();
+//! assert_eq!(j, "orsino@example.net/ilyria");
 //!
 //! let j = JID::try_from("juliet@example.net/balcony").unwrap();
-//! assert_eq!(j.local().unwrap(), "juliet");
-//! assert_eq!(j.domain(), "example.net");
-//! assert_eq!(j.resource().unwrap(), "balcony");
+//! assert_eq!(j, "juliet@example.net/balcony");
 //! ```
 
 #![deny(missing_docs)]
@@ -123,8 +122,7 @@ impl<'a> JID<'a> {
     /// Basic usage:
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// let j = JID::new("feste", "example.net", "").unwrap();
     /// assert_eq!(j, "feste@example.net");
     /// ```
@@ -174,8 +172,7 @@ impl<'a> JID<'a> {
     /// Basic usage:
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// let j = JID::from_domain("example.net").unwrap();
     /// assert_eq!(j, "example.net");
     /// ```
@@ -190,8 +187,7 @@ impl<'a> JID<'a> {
     /// Basic usage:
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// let j = JID::new("feste", "example.net", "res").unwrap();
     /// assert_eq!(j.bare(), "feste@example.net");
     /// ```
@@ -204,6 +200,14 @@ impl<'a> JID<'a> {
     }
 
     /// Parse a string to create a JID.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use xmpp_jid::JID;
+    /// let j = JID::parse("juliet@example.net/balcony").unwrap();
+    /// assert_eq!(j, "juliet@example.net/balcony");
+    /// ```
     pub fn parse(s: &'a str) -> Result<JID<'a>> {
         if s == "" {
             return Err(Error::EmptyJID);
@@ -295,8 +299,7 @@ impl<'a> JID<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// let j = JID::parse("mercutio@example.net/rp").unwrap();
     /// assert_eq!(j.local().unwrap(), "mercutio");
     ///
@@ -316,8 +319,7 @@ impl<'a> JID<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// let j = JID::parse("mercutio@example.net/rp").unwrap();
     /// assert_eq!(j.domain(), "example.net");
     /// ```
@@ -330,8 +332,7 @@ impl<'a> JID<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// let j = JID::parse("example.net/rp").unwrap();
     /// assert_eq!(j.resource().unwrap(), "rp");
     ///
@@ -353,8 +354,7 @@ impl<'a> JID<'a> {
     /// Constructing an invalid JID:
     ///
     /// ```rust
-    /// use xmpp_jid::JID;
-    ///
+    /// # use xmpp_jid::JID;
     /// unsafe {
     ///     let j = JID::new_unchecked(r#"/o\"#, "[badip]", "");
     ///     assert_eq!(j, r#"/o\@[badip]"#);
@@ -370,6 +370,17 @@ impl<'a> JID<'a> {
 }
 
 /// Format the JID in its canonical string form.
+///
+/// # Examples
+///
+/// Formatting and printing:
+///
+/// ```rust
+/// # use xmpp_jid::JID;
+/// let j = JID::parse("viola@example.net").unwrap();
+///
+/// assert_eq!(format!("{}", j), "viola@example.net")
+/// ```
 impl<'a> fmt::Display for JID<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.local.len() > 0 && self.resource.len() > 0 {
@@ -388,12 +399,11 @@ impl<'a> fmt::Display for JID<'a> {
 #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
 #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
-/// use std::convert::TryFrom;
-/// use xmpp_jid::JID;
+/// # use std::convert::TryInto;
+/// # use xmpp_jid::JID;
 ///
-/// let j = JID::try_from(("mercutio", "example.net")).unwrap();
-/// let j2 = JID::try_from("mercutio@example.net").unwrap();
-/// assert_eq!(j, j2);
+/// let j: JID = ("mercutio", "example.net").try_into().unwrap();
+/// assert_eq!(j, "mercutio@example.net");
 /// ```
 #[cfg(not(feature = "stable"))]
 impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
@@ -411,12 +421,11 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for JID<'a> {
 #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
 #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
-/// use std::convert::TryFrom;
-/// use xmpp_jid::JID;
+/// # use std::convert::TryInto;
+/// # use xmpp_jid::JID;
 ///
-/// let j = JID::try_from(("mercutio", "example.net", "nctYeCzm")).unwrap();
-/// let j2 = JID::try_from("mercutio@example.net/nctYeCzm").unwrap();
-/// assert_eq!(j, j2);
+/// let j: JID = ("mercutio", "example.net", "nctYeCzm").try_into().unwrap();
+/// assert_eq!(j, "mercutio@example.net/nctYeCzm");
 /// ```
 #[cfg(not(feature = "stable"))]
 impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
@@ -434,13 +443,11 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for JID<'a> {
 #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
 #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
-/// use std::convert::TryFrom;
-/// use xmpp_jid::JID;
+/// # use std::convert::TryInto;
+/// # use xmpp_jid::JID;
 ///
-/// let j = JID::try_from("example.net/rp").unwrap();
-/// assert!(j.local().is_none());
-/// assert_eq!(j.domain(), "example.net");
-/// assert_eq!(j.resource().unwrap(), "rp");
+/// let j: JID = "example.net/rp".try_into().unwrap();
+/// assert_eq!(j, "example.net/rp");
 /// ```
 #[cfg(not(feature = "stable"))]
 impl<'a> convert::TryFrom<&'a str> for JID<'a> {
@@ -463,8 +470,7 @@ impl<'a> convert::TryFrom<&'a str> for JID<'a> {
 /// # Examples
 ///
 /// ```rust
-/// use xmpp_jid::JID;
-///
+/// # use xmpp_jid::JID;
 /// let j = JID::parse("example.net/rp").unwrap();
 /// assert!(j == "example.net/rp");
 /// ```
@@ -492,8 +498,7 @@ impl<'a> cmp::PartialEq<str> for JID<'a> {
 /// # Examples
 ///
 /// ```rust
-/// use xmpp_jid::JID;
-///
+/// # use xmpp_jid::JID;
 /// let j = JID::parse("example.net/rp").unwrap();
 /// assert!("example.net/rp" == j);
 /// ```
