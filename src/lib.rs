@@ -1,6 +1,17 @@
 //! Implements the XMPP Address Format as defined in RFC 7622.
 //!
-//! Historically, XMPP addresses were called "Jabber Identifiers", or JIDs.
+//! For historical reasons, XMPP addresses are called "Jabber Identifiers", or JIDs. JIDs are
+//! comprised of three parts: the localpart (a username or account), the domainpart (the server),
+//! and the resourcepart (a specific client) and look more or less like an email where the first
+//! two parts are demarcated by the '@' character but with the
+//! resourcepart added to the end and demarcated by the '/' character, eg:
+//!
+//!     localpart@domainpart/resourcepart
+//!
+//! Like email, JIDs allow routing across networks based on the domainpart, and local routing based
+//! on the localpart. Unlike emails however, JIDs also allow for last-mile-delivery to *specific*
+//! clients (or "resources") using the resourcepart. Also unlike email, JIDs support
+//! internationalization.
 //!
 //! **Note well** that this package currently isn't fully compliant with [RFC 7622]; it does not
 //! perform the PRECIS ([RFC 7564]) enforcement step and it only compiles on nightly versions of
@@ -180,7 +191,7 @@ impl<'a> JID<'a> {
         JID::new("", domain, "")
     }
 
-    /// Consumes a JID to construct a bare JID (a JID without a resourcepart) from an existing JID.
+    /// Consumes a JID to construct a bare JID (a JID without a resourcepart).
     ///
     /// # Examples
     ///
