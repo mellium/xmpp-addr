@@ -6,7 +6,7 @@
 //! two parts are demarcated by the '@' character but with the
 //! resourcepart added to the end and demarcated by the '/' character, eg:
 //!
-//!     localpart@domainpart/resourcepart
+//! > localpart@domainpart/resourcepart
 //!
 //! Like email, JIDs allow routing across networks based on the domainpart, and local routing based
 //! on the localpart. Unlike emails however, JIDs also allow for last-mile-delivery to *specific*
@@ -60,7 +60,7 @@
 
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.3.0")]
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.3.1")]
 
 extern crate idna;
 

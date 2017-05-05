@@ -1,11 +1,10 @@
 [package]
 name = "xmpp-jid"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "BSD-2-Clause"
 description = """
 An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622.
-Currently only compiles on nightly versions of Rust.
 """
 repository = "https://bitbucket.org/mellium/xmpp-jid/"
 readme = "README.md"

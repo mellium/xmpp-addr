@@ -10,8 +10,8 @@ pipelines:
           - echo "Update Rust toolchains" ; rustup update
           - echo "Use nightly toolchain"  ; rustup default nightly
           - echo "Show Rust toolchain"    ; rustup show && rustc --version
-          - echo "Run unit tests"         ; cargo test --lib --release -v --no-fail-fast -- --nocapture --test
-          - echo "Building docs"          ; cargo doc --all-features --release
+          - echo "Run unit tests"         ; cargo test --no-default-features --lib --release -v --no-fail-fast -- --nocapture --test
+          - echo "Building docs"          ; cargo doc --no-default-features --release
           - echo "Packaging crate"        ; cargo package
   tags:
     v*:
@@ -21,6 +21,6 @@ pipelines:
             - echo "Update Rust toolchains" ; rustup update
             - echo "Use nightly toolchain"  ; rustup default nightly
             - echo "Show Rust toolchain"    ; rustup show && rustc --version
-            - echo "Run unit tests"         ; cargo test --lib --release -v --no-fail-fast -- --nocapture --test
-            - echo "Building docs"          ; cargo doc --all-features --release
+            - echo "Run unit tests"         ; cargo test --no-default-features --lib --release -v --no-fail-fast -- --nocapture --test
+            - echo "Building docs"          ; cargo doc --no-default-features --release
             - echo "Publishing crate"       ; cargo publish --token ${CARGO_API_KEY}
