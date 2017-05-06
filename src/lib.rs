@@ -57,12 +57,15 @@
 //! ```
 
 #![deny(missing_docs)]
-
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
 #![doc(html_root_url = "https://docs.rs/xmpp-jid/0.3.1")]
 
 extern crate idna;
+
+#[cfg(feature = "serde")]
+#[macro_use]
+extern crate serde;
 
 #[cfg(not(feature = "stable"))]
 use std::convert;
@@ -115,6 +118,7 @@ pub enum Error {
 pub type Result<T> = result::Result<T, Error>;
 
 /// A parsed JID.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Jid<'a> {
     local: borrow::Cow<'a, str>,
