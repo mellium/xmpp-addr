@@ -149,6 +149,14 @@ impl<'a> Jid<'a> {
     /// user or entity resides, and the resourcepart identifies a specific client. Everything but
     /// the domain is optional.
     ///
+    /// # Errors
+    ///
+    /// If the localpart or resourcepart passed to this function is not valid, or the domainpart
+    /// fails IDNA processing or is not a valid IPv6 address, this function returns an [error
+    /// variant].
+    ///
+    /// [error variant]: ./enum.Error.html
+    ///
     /// # Examples
     ///
     /// Basic usage:
@@ -205,6 +213,13 @@ impl<'a> Jid<'a> {
 
     /// Construct a JID containing only a domain part.
     ///
+    /// # Errors
+    ///
+    /// If domain fails the IDNA "to Unicode" operation, or is enclosed in square brackets ("[]")
+    /// but is not a valid IPv6 address, this function returns an [error variant].
+    ///
+    /// [error variant]: ./enum.Error.html
+    ///
     /// # Examples
     ///
     /// Basic usage:
@@ -250,6 +265,13 @@ impl<'a> Jid<'a> {
     }
 
     /// Parse a string to create a Jid.
+    ///
+    /// # Errors
+    ///
+    /// If the entire string or any part of the JID is empty or not valid, or the domainpart fails
+    /// IDNA processing or is not a valid IPv6 address, this function returns an [error variant].
+    ///
+    /// [error variant]: ./enum.Error.html
     ///
     /// # Examples
     ///
@@ -474,6 +496,13 @@ impl<'a> fmt::Display for Jid<'a> {
 
 /// Create a bare JID from a 2-tuple.
 ///
+/// # Errors
+///
+/// If the first item in the tuple is not a valid localpart or the second item in the tuple fails
+/// IDNA processing or is not a valid IPv6 address, this function returns an [error variant].
+///
+/// [error variant]: ./enum.Error.html
+///
 /// # Examples
 ///
 #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
@@ -501,6 +530,14 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
 
 /// Creates a full JID from a 3-tuple.
 ///
+/// # Errors
+///
+/// If the first item in the tuple is not a valid localpart, the second item in the tuple fails
+/// IDNA processing or is not a valid IPv6 address, or the third item in the tuple is not a valid
+/// domainpart, this function returns an [error variant].
+///
+/// [error variant]: ./enum.Error.html
+///
 /// # Examples
 ///
 #[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
@@ -527,6 +564,13 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
 }
 
 /// Parse a string to create a JID.
+///
+/// # Errors
+///
+/// If the entire string or any part of the JID is empty or not valid, or the domainpart fails IDNA
+/// processing or is not a valid IPv6 address, this function returns an [error variant].
+///
+/// [error variant]: ./enum.Error.html
 ///
 /// # Examples
 ///
