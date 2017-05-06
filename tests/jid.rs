@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
 extern crate xmpp_jid;
-use xmpp_jid::JID;
+use xmpp_jid::Jid;
 
 
 #[cfg(not(feature = "stable"))]
@@ -15,9 +15,9 @@ macro_rules! test_valid_jids {
                 let v = vec![$jid, $local, $domain, $res];
 
                 #[cfg(not(feature = "stable"))]
-                let jid = JID::try_from(v[0]);
+                let jid = Jid::try_from(v[0]);
                 #[cfg(feature = "stable")]
-                let jid = JID::from_str(v[0]);
+                let jid = Jid::from_str(v[0]);
 
                 match jid {
                     Err(e) => panic!(e),
@@ -45,9 +45,9 @@ macro_rules! test_invalid_jids {
             fn $num() {
                 let j = $jid;
                 #[cfg(not(feature = "stable"))]
-                let jid = JID::try_from(j.as_ref());
+                let jid = Jid::try_from(j.as_ref());
                 #[cfg(feature = "stable")]
-                let jid = JID::from_str(j.as_ref());
+                let jid = Jid::from_str(j.as_ref());
                 match jid {
                     Err(_) => {}
                     Ok(_) => {
