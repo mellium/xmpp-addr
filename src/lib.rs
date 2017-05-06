@@ -266,6 +266,10 @@ impl<'a> Jid<'a> {
 
     /// Parse a string to create a Jid.
     ///
+    /// This does not implement the `FromStr` trait because the Jid type requires an explicit
+    /// lifetime annotation and the `from_str` method of `FromStr` uses an implicit annotation
+    /// which is not compatible with the Jid type.
+    ///
     /// # Errors
     ///
     /// If the entire string or any part of the JID is empty or not valid, or the domainpart fails
