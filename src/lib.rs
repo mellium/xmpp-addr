@@ -599,12 +599,12 @@ impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
 
 /// Allows JIDs to be compared with strings.
 ///
-/// **This may be expensive**. The JID is first converted into its canonical string representation
-/// and compared for bit-string identity with the provided string (byte-wise compare). If the
-/// string does not match, it is then canonicalized itself (by converting it into a JID) and
-/// compared again. If constructing a JID from the string fails, the comparison always fails (even
-/// if the original JID is would match the invalid output). Unsafe comparisons should convert the
-/// JID to a string and compare strings themselves.
+/// **This is expensive**. The JID is first converted into its canonical string representation and
+/// compared for bit-string identity with the provided string (byte-wise compare). If the string
+/// does not match, it is then canonicalized itself (by converting it into a JID) and compared
+/// again. If constructing a JID from the string fails, the comparison always fails (even if the
+/// original JID is would match the invalid output). Unsafe comparisons should convert the JID to a
+/// string and compare strings themselves.
 ///
 /// # Examples
 ///
@@ -633,12 +633,12 @@ impl<'a> cmp::PartialEq<str> for Jid<'a> {
 
 /// Allows JIDs to be compared with strings.
 ///
-/// **This may be expensive**. The JID is first converted into its canonical string representation
-/// and compared for bit-string identity with the provided string (byte-wise compare). If the
-/// string does not match, it is then canonicalized itself (by converting it into a JID) and
-/// compared again. If constructing a JID from the string fails, the comparison always fails (even
-/// if the original JID is would match the invalid output). Unsafe comparisons should convert the
-/// JID to a string and compare strings themselves.
+/// **This is expensive**. The JID is first converted into its canonical string representation and
+/// compared for bit-string identity with the provided string (byte-wise compare). If the string
+/// does not match, it is then canonicalized itself (by converting it into a JID) and compared
+/// again. If constructing a JID from the string fails, the comparison always fails (even if the
+/// original JID is would match the invalid output). Unsafe comparisons should convert the JID to a
+/// string and compare strings themselves.
 ///
 /// # Examples
 ///
@@ -665,7 +665,7 @@ macro_rules! impl_eq {
 
         /// Allows JIDs to be compared with strings.
         ///
-        /// **This may be expensive**. The JID is first converted into its canonical string
+        /// **This is expensive**. The JID is first converted into its canonical string
         /// representation and compared for bit-string identity with the provided string (byte-wise
         /// compare). If the string does not match, it is then canonicalized itself (by converting
         /// it into a JID) and compared again. If constructing a JID from the string fails, the
@@ -678,7 +678,7 @@ macro_rules! impl_eq {
 
         /// Allows JIDs to be compared with strings.
         ///
-        /// **This may be expensive**. The JID is first converted into its canonical string
+        /// **This is expensive**. The JID is first converted into its canonical string
         /// representation and compared for bit-string identity with the provided string (byte-wise
         /// compare). If the string does not match, it is then canonicalized itself (by converting
         /// it into a JID) and compared again. If constructing a JID from the string fails, the
