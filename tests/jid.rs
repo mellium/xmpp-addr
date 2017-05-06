@@ -17,7 +17,7 @@ macro_rules! test_valid_jids {
                 #[cfg(not(feature = "stable"))]
                 let jid = JID::try_from(v[0]);
                 #[cfg(feature = "stable")]
-                let jid = JID::parse(v[0]);
+                let jid = JID::from_str(v[0]);
 
                 match jid {
                     Err(e) => panic!(e),
@@ -47,7 +47,7 @@ macro_rules! test_invalid_jids {
                 #[cfg(not(feature = "stable"))]
                 let jid = JID::try_from(j.as_ref());
                 #[cfg(feature = "stable")]
-                let jid = JID::parse(j.as_ref());
+                let jid = JID::from_str(j.as_ref());
                 match jid {
                     Err(_) => {}
                     Ok(_) => {
