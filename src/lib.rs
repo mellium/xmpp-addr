@@ -27,18 +27,30 @@
 //!
 //! ```rust
 //! # use xmpp_jid::Jid;
-//! let j = Jid::new("feste", "example.net", "").unwrap();
+//! # fn try_main() -> Result<(), xmpp_jid::Error> {
+//! let j = Jid::new("feste", "example.net", "")?;
 //! assert_eq!(j, "feste@example.net");
+//! #     Ok(())
+//! # }
+//! # fn main() {
+//! #   try_main().unwrap();
+//! # }
 //! ```
 //!
 //! ## Parsing (stable)
 //!
 //! ```rust
 //! # use xmpp_jid::Jid;
-//! let j = Jid::from_str("juliet@example.net/balcony").unwrap();
+//! # fn try_main() -> Result<(), xmpp_jid::Error> {
+//! let j = Jid::from_str("juliet@example.net/balcony")?;
 //! assert_eq!(j.local().unwrap(), "juliet");
 //! assert_eq!(j.domain(), "example.net");
 //! assert_eq!(j.resource().unwrap(), "balcony");
+//! #     Ok(())
+//! # }
+//! # fn main() {
+//! #   try_main().unwrap();
+//! # }
 //! ```
 //!
 //! ## Parsing (nightly)
@@ -48,12 +60,17 @@
 //! #![feature(try_from)]
 //! # use std::convert::{ TryInto, TryFrom };
 //! # use xmpp_jid::Jid;
-//!
-//! let j: Jid = "orsino@example.net/ilyria".try_into().unwrap();
+//! # fn try_main() -> Result<(), xmpp_jid::Error> {
+//! let j: Jid = "orsino@example.net/ilyria".try_into()?;
 //! assert_eq!(j, "orsino@example.net/ilyria");
 //!
-//! let j = Jid::try_from("juliet@example.net/balcony").unwrap();
+//! let j = Jid::try_from("juliet@example.net/balcony")?;
 //! assert_eq!(j, "juliet@example.net/balcony");
+//! #     Ok(())
+//! # }
+//! # fn main() {
+//! #   try_main().unwrap();
+//! # }
 //! ```
 
 #![deny(missing_docs)]
@@ -138,8 +155,14 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::new("feste", "example.net", "").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::new("feste", "example.net", "")?;
     /// assert_eq!(j, "feste@example.net");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn new(local: &'a str, domain: &'a str, resource: &'a str) -> Result<Jid<'a>> {
 
@@ -188,8 +211,14 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::from_domain("example.net").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::from_domain("example.net")?;
     /// assert_eq!(j, "example.net");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn from_domain(domain: &'a str) -> Result<Jid<'a>> {
         Jid::new("", domain, "")
@@ -203,8 +232,14 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::new("feste", "example.net", "res").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::new("feste", "example.net", "res")?;
     /// assert_eq!(j.bare(), "feste@example.net");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn bare(self) -> Jid<'a> {
         Jid {
@@ -220,8 +255,14 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::from_str("juliet@example.net/balcony").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::from_str("juliet@example.net/balcony")?;
     /// assert_eq!(j, "juliet@example.net/balcony");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn from_str(s: &'a str) -> Result<Jid<'a>> {
         if s == "" {
@@ -315,11 +356,17 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::from_str("mercutio@example.net/rp").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::from_str("mercutio@example.net/rp")?;
     /// assert_eq!(j.local().unwrap(), "mercutio");
     ///
-    /// let j = Jid::from_str("example.net/rp").unwrap();
+    /// let j = Jid::from_str("example.net/rp")?;
     /// assert!(j.local().is_none());
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn local(&self) -> Option<String> {
         let l: String = self.local.clone().into();
@@ -335,8 +382,14 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::from_str("mercutio@example.net/rp").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::from_str("mercutio@example.net/rp")?;
     /// assert_eq!(j.domain(), "example.net");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn domain(&self) -> String {
         self.domain.clone().into()
@@ -348,11 +401,17 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_jid::Jid;
-    /// let j = Jid::from_str("example.net/rp").unwrap();
+    /// # fn try_main() -> Result<(), xmpp_jid::Error> {
+    /// let j = Jid::from_str("example.net/rp")?;
     /// assert_eq!(j.resource().unwrap(), "rp");
     ///
-    /// let j = Jid::from_str("feste@example.net").unwrap();
+    /// let j = Jid::from_str("feste@example.net")?;
     /// assert!(j.resource().is_none());
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
     /// ```
     pub fn resource(&self) -> Option<String> {
         let r: String = self.resource.clone().into();
@@ -392,9 +451,15 @@ impl<'a> Jid<'a> {
 ///
 /// ```rust
 /// # use xmpp_jid::Jid;
-/// let j = Jid::from_str("viola@example.net").unwrap();
+/// # fn try_main() -> Result<(), xmpp_jid::Error> {
+/// let j = Jid::from_str("viola@example.net")?;
 ///
-/// assert_eq!(format!("{}", j), "viola@example.net")
+/// assert_eq!(format!("{}", j), "viola@example.net");
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
 /// ```
 impl<'a> fmt::Display for Jid<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -416,9 +481,14 @@ impl<'a> fmt::Display for Jid<'a> {
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_jid::Jid;
-///
-/// let j: Jid = ("mercutio", "example.net").try_into().unwrap();
+/// # fn try_main() -> Result<(), xmpp_jid::Error> {
+/// let j: Jid = ("mercutio", "example.net").try_into()?;
 /// assert_eq!(j, "mercutio@example.net");
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
 /// ```
 #[cfg(not(feature = "stable"))]
 impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
@@ -438,9 +508,14 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_jid::Jid;
-///
-/// let j: Jid = ("mercutio", "example.net", "nctYeCzm").try_into().unwrap();
+/// # fn try_main() -> Result<(), xmpp_jid::Error> {
+/// let j: Jid = ("mercutio", "example.net", "nctYeCzm").try_into()?;
 /// assert_eq!(j, "mercutio@example.net/nctYeCzm");
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
 /// ```
 #[cfg(not(feature = "stable"))]
 impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
@@ -460,9 +535,14 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_jid::Jid;
-///
-/// let j: Jid = "example.net/rp".try_into().unwrap();
+/// # fn try_main() -> Result<(), xmpp_jid::Error> {
+/// let j: Jid = "example.net/rp".try_into()?;
 /// assert_eq!(j, "example.net/rp");
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
 /// ```
 #[cfg(not(feature = "stable"))]
 impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
@@ -486,8 +566,14 @@ impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
 ///
 /// ```rust
 /// # use xmpp_jid::Jid;
-/// let j = Jid::from_str("example.net/rp").unwrap();
+/// # fn try_main() -> Result<(), xmpp_jid::Error> {
+/// let j = Jid::from_str("example.net/rp")?;
 /// assert!(j == "example.net/rp");
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
 /// ```
 impl<'a> cmp::PartialEq<str> for Jid<'a> {
     fn eq(&self, other: &str) -> bool {
@@ -514,8 +600,14 @@ impl<'a> cmp::PartialEq<str> for Jid<'a> {
 ///
 /// ```rust
 /// # use xmpp_jid::Jid;
-/// let j = Jid::from_str("example.net/rp").unwrap();
+/// # fn try_main() -> Result<(), xmpp_jid::Error> {
+/// let j = Jid::from_str("example.net/rp")?;
 /// assert!("example.net/rp" == j);
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
 /// ```
 impl<'a> cmp::PartialEq<Jid<'a>> for str {
     fn eq(&self, other: &Jid<'a>) -> bool {
