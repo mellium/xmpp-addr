@@ -1,5 +1,6 @@
 [package]
 name = "xmpp-jid"
+# Remember to bump html_root_url in src/lib.rs as well.
 version = "0.3.1"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "BSD-2-Clause"
