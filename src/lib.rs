@@ -534,8 +534,6 @@ macro_rules! impl_eq {
         impl<'a, 'b> PartialEq<$lhs> for $rhs {
             #[inline]
             fn eq(&self, other: &$lhs) -> bool { PartialEq::eq(self, &other[..]) }
-            #[inline]
-            fn ne(&self, other: &$lhs) -> bool { PartialEq::ne(self, &other[..]) }
         }
 
         /// Allows JIDs to be compared with strings.
@@ -549,8 +547,6 @@ macro_rules! impl_eq {
         impl<'a, 'b> PartialEq<$rhs> for $lhs {
             #[inline]
             fn eq(&self, other: &$rhs) -> bool { PartialEq::eq(&self[..], other) }
-            #[inline]
-            fn ne(&self, other: &$rhs) -> bool { PartialEq::ne(&self[..], other) }
         }
 
     }
