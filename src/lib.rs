@@ -76,7 +76,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/xmpp-jid/0.5.0")]
 
 extern crate idna;
 
