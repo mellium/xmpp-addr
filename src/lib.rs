@@ -397,11 +397,10 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn local(&self) -> Option<String> {
-        let l: String = self.local.clone().into();
-        match l.len() {
+    pub fn local(&'a self) -> Option<&'a str> {
+        match self.local.len() {
             0 => None,
-            _ => Some(l),
+            _ => Some(self.local),
         }
     }
 
@@ -420,8 +419,8 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn domain(&self) -> String {
-        self.domain.clone().into()
+    pub fn domain(&'a self) -> &'a str {
+        &(self.domain)
     }
 
     /// Returns the resourcepart of the JID in canonical form.
@@ -442,11 +441,10 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn resource(&self) -> Option<String> {
-        let r: String = self.resource.clone().into();
-        match r.len() {
+    pub fn resource(&self) -> Option<&'a str> {
+        match self.resource.len() {
             0 => None,
-            _ => Some(r),
+            _ => Some(self.resource),
         }
     }
 

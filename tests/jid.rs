@@ -24,12 +24,12 @@ macro_rules! test_valid_jids {
                     Ok(j) => {
                         match j.local() {
                             None => assert_eq!(v[1], ""),
-                            Some(l) =>  assert_eq!(v[1], &l)
+                            Some(l) =>  assert_eq!(v[1], l)
                         }
                         assert_eq!(v[2], j.domain());
                         match j.resource() {
                             None => assert_eq!(v[3], ""),
-                            Some(r) =>  assert_eq!(v[3], &r)
+                            Some(r) =>  assert_eq!(v[3], r)
                         }
                     }
                 }
