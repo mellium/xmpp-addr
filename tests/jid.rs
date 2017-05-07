@@ -96,4 +96,5 @@ test_invalid_jids!(invalid_00: "test@/test",
                    invalid_18: r#"/rp"#,
                    invalid_19: r#"@/"#,
                    invalid_20: r#"/"#,
-                   invalid_21: r#"@"#);
+                   invalid_21: r#"@"#,
+                   invalid_22: r#"["#);

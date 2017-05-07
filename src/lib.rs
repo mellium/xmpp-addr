@@ -173,23 +173,26 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn new(local: &'a str, domain: &'a str, resource: &'a str) -> Result<Jid<'a>> {
-
-        let (dlabel, result) = idna::domain_to_unicode(domain);
-        match result {
-            Ok(_) => {}
-            Err(e) => {
-                // Ignore errors if this is a valid IPv6 address.
-                if dlabel.len() > 2 && dlabel.starts_with('[') && dlabel.ends_with(']') {
-                    let inner = unsafe { (&dlabel).slice_unchecked(1, dlabel.len() - 1) };
-                    match net::Ipv6Addr::from_str(inner) {
-                        Ok(_) => {}
-                        Err(v) => return Err(Error::Addr(v)),
-                    }
-                } else {
-                    return Err(Error::IDNA(e));
-                }
+        let is_v6 = if domain.starts_with('[') && domain.ends_with(']') {
+            // This should be an IPv6 address, validate it.
+            let inner = unsafe { domain.slice_unchecked(1, domain.len() - 1) };
+            match net::Ipv6Addr::from_str(inner) {
+                Ok(_) => true,
+                Err(v) => return Err(Error::Addr(v)),
             }
-        }
+        } else {
+            false
+        };
+
+        let dlabel: borrow::Cow<'a, str> = if !is_v6 {
+            let (dlabel, result) = idna::domain_to_unicode(domain);
+            match result {
+                Ok(_) => dlabel.into(),
+                Err(e) => return Err(Error::IDNA(e)),
+            }
+        } else {
+            domain.into()
+        };
 
         if local.len() > 1023 {
             return Err(Error::LongLocal);
