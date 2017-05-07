@@ -397,7 +397,7 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn local(&'a self) -> Option<&'a str> {
+    pub fn local(&self) -> Option<&str> {
         match self.local.len() {
             0 => None,
             _ => Some(self.local),
@@ -419,7 +419,7 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn domain(&'a self) -> &'a str {
+    pub fn domain(&self) -> &str {
         &(self.domain)
     }
 
@@ -441,7 +441,7 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn resource(&self) -> Option<&'a str> {
+    pub fn resource(&self) -> Option<&str> {
         match self.resource.len() {
             0 => None,
             _ => Some(self.resource),
