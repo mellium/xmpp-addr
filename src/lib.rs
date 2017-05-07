@@ -138,9 +138,9 @@ pub type Result<T> = result::Result<T, Error>;
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Jid<'a> {
-    local: borrow::Cow<'a, str>,
+    local: &'a str,
     domain: borrow::Cow<'a, str>,
-    resource: borrow::Cow<'a, str>,
+    resource: &'a str,
 }
 
 impl<'a> Jid<'a> {
@@ -208,9 +208,9 @@ impl<'a> Jid<'a> {
         }
 
         Ok(Jid {
-               local: local.into(),
-               domain: dlabel.into(),
-               resource: resource.into(),
+               local: local,
+               domain: dlabel,
+               resource: resource,
            })
     }
 
@@ -263,7 +263,7 @@ impl<'a> Jid<'a> {
         Jid {
             local: self.local,
             domain: self.domain,
-            resource: "".into(),
+            resource: "",
         }
     }
 
@@ -465,9 +465,9 @@ impl<'a> Jid<'a> {
     /// ```
     pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> Jid<'a> {
         Jid {
-            local: local.into(),
+            local: local,
             domain: domain.into(),
-            resource: resource.into(),
+            resource: resource,
         }
     }
 }
