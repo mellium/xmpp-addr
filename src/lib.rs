@@ -136,7 +136,7 @@ pub type Result<T> = result::Result<T, Error>;
 
 /// A parsed JID.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Jid<'a> {
     local: &'a str,
     domain: borrow::Cow<'a, str>,
