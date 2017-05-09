@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
 extern crate xmpp_jid;
-use xmpp_jid::Jid;
+use xmpp_jid::{Jid, Error};
 
 
 #[cfg(not(feature = "stable"))]
@@ -98,3 +98,19 @@ test_invalid_jids!(invalid_00: "test@/test",
                    invalid_20: r#"/"#,
                    invalid_21: r#"@"#,
                    invalid_22: r#"["#);
+
+#[test]
+fn test_send() {
+    fn assert_send<T: Send>() {}
+    assert_send::<Jid>();
+    assert_send::<Error>();
+    assert_send::<xmpp_jid::Result<Jid>>();
+}
+
+#[test]
+fn test_sync() {
+    fn assert_sync<T: Sync>() {}
+    assert_sync::<Jid>();
+    assert_sync::<Error>();
+    assert_sync::<xmpp_jid::Result<Jid>>();
+}
