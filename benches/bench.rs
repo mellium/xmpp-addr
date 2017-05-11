@@ -12,8 +12,8 @@
 extern crate test;
 use test::Bencher;
 
-extern crate xmpp_jid;
-use xmpp_jid::Jid;
+extern crate xmpp_addr;
+use xmpp_addr::Jid;
 
 use std::convert::TryFrom;
 

@@ -1,16 +1,17 @@
 [package]
-name = "xmpp-jid"
+name = "xmpp-addr"
 # Remember to bump html_root_url in src/lib.rs as well.
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "MIT/Apache-2.0"
 description = """
-This crate has been moved to [xmpp-addr].
-
-[xmpp-addr]: https://crates.io/crates/xmpp-addr
+An implementation of the XMPP Address format (Jabber ID) defined in RFC 7622.
 """
 repository = "https://bitbucket.org/mellium/xmpp-addr/"
 readme = "README.md"
+keywords = ["xmpp", "jabber", "jid", "rfc7622", "rfc6120"]
+documentation = "https://docs.rs/xmpp-addr"
+categories = []
 
 exclude = [
     "bitbucket-pipelines.yml",

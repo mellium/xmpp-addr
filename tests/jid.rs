@@ -8,14 +8,14 @@
 
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 
-extern crate xmpp_jid;
-use xmpp_jid::{Jid, Error};
+extern crate xmpp_addr;
+use xmpp_addr::{Jid, Error};
 
 
 #[cfg(not(feature = "stable"))]
 use std::convert::TryFrom;
 
-macro_rules! test_valid_jids {
+macro_rules! test_valid_addrs {
     ( $( $num:ident: [$jid:expr, $local:expr, $domain:expr, $res:expr] ),+ ) => {
         $(
             #[test]
@@ -46,7 +46,7 @@ macro_rules! test_valid_jids {
     };
 }
 
-macro_rules! test_invalid_jids {
+macro_rules! test_invalid_addrs {
     ( $( $num:ident: $jid:expr ),+ ) => {
         $(
             #[test]
@@ -67,7 +67,7 @@ macro_rules! test_invalid_jids {
     };
 }
 
-test_valid_jids!(valid_00: ["example.net", "", "example.net", ""],
+test_valid_addrs!(valid_00: ["example.net", "", "example.net", ""],
                  valid_01: ["example.net/rp", "", "example.net", "rp"],
                  valid_02: ["mercutio@example.net", "mercutio", "example.net", ""],
                  valid_03: ["mercutio@example.net/rp", "mercutio", "example.net", "rp"],
@@ -83,7 +83,7 @@ test_valid_jids!(valid_00: ["example.net", "", "example.net", ""],
                  valid_13: ["example.net.../rp", "", "example.net", "rp"],
                  valid_14: ["[::1]", "", "[::1]", ""]);
 
-test_invalid_jids!(invalid_00: "test@/test",
+test_invalid_addrs!(invalid_00: "test@/test",
                    invalid_01: "lp@/rp",
                    invalid_02: r#"b"d@example.net"#,
                    invalid_03: r#"b&d@example.net"#,
@@ -112,7 +112,7 @@ fn test_send() {
     fn assert_send<T: Send>() {}
     assert_send::<Jid>();
     assert_send::<Error>();
-    assert_send::<xmpp_jid::Result<Jid>>();
+    assert_send::<xmpp_addr::Result<Jid>>();
 }
 
 #[test]
@@ -120,5 +120,5 @@ fn test_sync() {
     fn assert_sync<T: Sync>() {}
     assert_sync::<Jid>();
     assert_sync::<Error>();
-    assert_sync::<xmpp_jid::Result<Jid>>();
+    assert_sync::<xmpp_addr::Result<Jid>>();
 }
