@@ -296,6 +296,112 @@ impl<'a> Jid<'a> {
         }
     }
 
+    /// Consumes a JID to construct a new JID with the given localpart.
+    ///
+    /// # Errors
+    ///
+    /// If the localpart is too long [`Error::LongLocal`] is returned.
+    ///
+    /// [`Error::LongLocal`]: ./enum.Error.html
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// # use xmpp_addr::Jid;
+    /// # fn try_main() -> Result<(), xmpp_addr::Error> {
+    /// let j = Jid::from_str("example.net")?;
+    /// assert_eq!(j.with_local("feste")?, "feste@example.net");
+    ///
+    /// let j = Jid::from_str("iago@example.net")?;
+    /// assert_eq!(j.with_local("")?, "example.net");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
+    /// ```
+    pub fn with_local(self, local: &'a str) -> Result<Jid<'a>> {
+        Ok(Jid {
+               local: match Jid::process_local(local) {
+                   Err(err) => return Err(err),
+                   Ok(l) => l,
+               },
+               domain: self.domain,
+               resource: self.resource,
+           })
+    }
+
+    /// Consumes a JID to construct a new JID with the given domainpart.
+    ///
+    /// # Errors
+    ///
+    /// If the domain is too long, too short, or fails IDNA processing, an [error variant] is
+    /// returned.
+    ///
+    /// [error variant]: ./enum.Error.html
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// # use xmpp_addr::Jid;
+    /// # fn try_main() -> Result<(), xmpp_addr::Error> {
+    /// let j = Jid::from_str("feste@example.net")?;
+    /// assert_eq!(j.with_domain("example.org")?, "feste@example.org");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
+    /// ```
+    pub fn with_domain(self, domain: &'a str) -> Result<Jid<'a>> {
+        Ok(Jid {
+               local: self.local,
+               domain: match Jid::process_domain(domain) {
+                   Err(err) => return Err(err),
+                   Ok(d) => d,
+               },
+               resource: self.resource,
+           })
+    }
+
+    /// Consumes a JID to construct a new JID with the given resourcepart.
+    ///
+    /// # Errors
+    ///
+    /// If the resource is too long [`Error::LongResource`] is returned.
+    ///
+    /// [`Error::LongResource`]: ./enum.Error.html
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// # use xmpp_addr::Jid;
+    /// # fn try_main() -> Result<(), xmpp_addr::Error> {
+    /// let j = Jid::from_str("feste@example.net")?;
+    /// assert_eq!(j.with_resource("1234")?, "feste@example.net/1234");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
+    /// ```
+    pub fn with_resource(self, resource: &'a str) -> Result<Jid<'a>> {
+        Ok(Jid {
+               local: self.local,
+               domain: self.domain,
+               resource: match Jid::process_resource(resource) {
+                   Err(err) => return Err(err),
+                   Ok(r) => r,
+               },
+           })
+    }
+
     /// Parse a string to create a Jid.
     ///
     /// This does not implement the `FromStr` trait because the Jid type requires an explicit
