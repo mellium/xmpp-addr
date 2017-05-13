@@ -181,6 +181,30 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn new(local: &'a str, domain: &'a str, resource: &'a str) -> Result<Jid<'a>> {
+        Ok(Jid {
+               local: match Jid::process_local(local) {
+                   Err(err) => return Err(err),
+                   Ok(l) => l,
+               },
+               domain: match Jid::process_domain(domain) {
+                   Err(err) => return Err(err),
+                   Ok(d) => d,
+               },
+               resource: match Jid::process_resource(resource) {
+                   Err(err) => return Err(err),
+                   Ok(r) => r,
+               },
+           })
+    }
+
+    fn process_local(local: &'a str) -> Result<&'a str> {
+        if local.len() > 1023 {
+            return Err(Error::LongLocal);
+        }
+        Ok(local)
+    }
+
+    fn process_domain(domain: &'a str) -> Result<borrow::Cow<'a, str>> {
         let is_v6 = if domain.starts_with('[') && domain.ends_with(']') {
             // This should be an IPv6 address, validate it.
             let inner = unsafe { domain.slice_unchecked(1, domain.len() - 1) };
@@ -202,24 +226,21 @@ impl<'a> Jid<'a> {
             domain.into()
         };
 
-        if local.len() > 1023 {
-            return Err(Error::LongLocal);
-        }
         if dlabel.len() > 1023 {
             return Err(Error::LongDomain);
         }
         if dlabel.len() < 1 {
             return Err(Error::ShortDomain);
         }
-        if resource.len() > 1023 {
+
+        Ok(dlabel)
+    }
+
+    fn process_resource(res: &'a str) -> Result<&'a str> {
+        if res.len() > 1023 {
             return Err(Error::LongResource);
         }
-
-        Ok(Jid {
-               local: local,
-               domain: dlabel,
-               resource: resource,
-           })
+        Ok(res)
     }
 
     /// Construct a JID containing only a domain part.
