@@ -261,10 +261,28 @@ impl<'a> Jid<'a> {
     }
 
     fn process_resource(res: &'a str) -> Result<borrow::Cow<'a, str>> {
+        let res: borrow::Cow<'a, str> = if res.is_ascii() {
+            res.into()
+        } else {
+            // TODO: This should be done with a separate PRECIS library and the preparation step of
+            // the OpaqueString class should be applied first
+            res.chars()
+                // RFC 7613 §4.2.2:
+                //    2.  Additional Mapping Rule: Any instances of non-ASCII space MUST be
+                //        mapped to ASCII space (U+0020); a non-ASCII space is any Unicode
+                //        code point having a Unicode general category of "Zs" (with the
+                //        exception of U+0020).
+                .map(|c| if c.is_whitespace() { '\u{0020}' } else { c })
+                // RFC 7613 §4.2.2:
+                //    4.  Normalization Rule: Unicode Normalization Form C (NFC) MUST be
+                //        applied to all characters.
+                .nfc()
+                .collect()
+        };
         if res.len() > 1023 {
             return Err(Error::LongResource);
         }
-        Ok(res.into())
+        Ok(res)
     }
 
     /// Construct a JID containing only a domain part.
