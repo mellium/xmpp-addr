@@ -23,23 +23,18 @@ macro_rules! test_valid_addrs {
                 let v = vec![$jid, $local, $domain, $res];
 
                 #[cfg(not(feature = "stable"))]
-                let jid = Jid::try_from(v[0]);
+                let jid = Jid::try_from(v[0]).expect("Error parsing JID");
                 #[cfg(feature = "stable")]
-                let jid = Jid::from_str(v[0]);
+                let jid = Jid::from_str(v[0]).expect("Error parsing JID");
 
-                match jid {
-                    Err(e) => panic!(e),
-                    Ok(j) => {
-                        match j.local() {
-                            None => assert_eq!(v[1], ""),
-                            Some(l) =>  assert_eq!(v[1], l)
-                        }
-                        assert_eq!(v[2], j.domain());
-                        match j.resource() {
-                            None => assert_eq!(v[3], ""),
-                            Some(r) =>  assert_eq!(v[3], r)
-                        }
-                    }
+                match jid.local() {
+                    None => assert_eq!(v[1], ""),
+                    Some(l) =>  assert_eq!(v[1], l)
+                }
+                assert_eq!(v[2], jid.domain());
+                match jid.resource() {
+                    None => assert_eq!(v[3], ""),
+                    Some(r) =>  assert_eq!(v[3], r)
                 }
             }
         )*
