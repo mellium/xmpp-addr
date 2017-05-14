@@ -153,7 +153,7 @@ pub type Result<T> = result::Result<T, Error>;
 pub struct Jid<'a> {
     local: borrow::Cow<'a, str>,
     domain: borrow::Cow<'a, str>,
-    resource: &'a str,
+    resource: borrow::Cow<'a, str>,
 }
 
 impl<'a> Jid<'a> {
@@ -260,11 +260,11 @@ impl<'a> Jid<'a> {
         Ok(dlabel)
     }
 
-    fn process_resource(res: &'a str) -> Result<&'a str> {
+    fn process_resource(res: &'a str) -> Result<borrow::Cow<'a, str>> {
         if res.len() > 1023 {
             return Err(Error::LongResource);
         }
-        Ok(res)
+        Ok(res.into())
     }
 
     /// Construct a JID containing only a domain part.
@@ -316,7 +316,7 @@ impl<'a> Jid<'a> {
         Jid {
             local: self.local,
             domain: self.domain,
-            resource: "",
+            resource: "".into(),
         }
     }
 
@@ -603,7 +603,7 @@ impl<'a> Jid<'a> {
     pub fn resource(&self) -> Option<&str> {
         match self.resource.len() {
             0 => None,
-            _ => Some(self.resource),
+            _ => Some(&(self.resource[..])),
         }
     }
 
@@ -624,7 +624,7 @@ impl<'a> Jid<'a> {
         Jid {
             local: local.into(),
             domain: domain.into(),
-            resource: resource,
+            resource: resource.into(),
         }
     }
 }
