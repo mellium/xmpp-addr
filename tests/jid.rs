@@ -64,7 +64,7 @@ macro_rules! test_invalid_addrs {
 
 test_valid_addrs!(valid_00: ["example.net", "", "example.net", ""],
                  valid_01: ["example.net/rp", "", "example.net", "rp"],
-                 valid_02: ["mercutio@example.net", "mercutio", "example.net", ""],
+                 valid_02: ["mERCUTIo@example.net", "mercutio", "example.net", ""],
                  valid_03: ["mercutio@example.net/rp", "mercutio", "example.net", "rp"],
                  valid_04: ["mercutio@example.net/rp@rp", "mercutio", "example.net", "rp@rp"],
                  valid_05: ["mercutio@example.net/rp@rp/rp", "mercutio", "example.net", "rp@rp/rp"],
@@ -76,7 +76,8 @@ test_valid_addrs!(valid_00: ["example.net", "", "example.net", ""],
                  valid_11: ["test@example.net./rp", "test", "example.net", "rp"],
                  valid_12: ["example.net./rp", "", "example.net", "rp"],
                  valid_13: ["example.net.../rp", "", "example.net", "rp"],
-                 valid_14: ["[::1]", "", "[::1]", ""]);
+                 valid_14: ["[::1]", "", "[::1]", ""],
+                 valid_15: ["\u{212B}@example.net", "\u{00e5}", "example.net", ""]);
 
 test_invalid_addrs!(invalid_00: "test@/test",
                    invalid_01: "lp@/rp",

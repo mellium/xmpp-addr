@@ -83,10 +83,14 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
+#![cfg_attr(not(feature = "stable"), feature(ascii_ctype))]
 
 #![doc(html_root_url = "https://docs.rs/xmpp-addr/0.8.0")]
 
 extern crate idna;
+extern crate unicode_normalization;
+
+use unicode_normalization::UnicodeNormalization;
 
 #[cfg(feature = "serde")]
 #[macro_use]
@@ -95,6 +99,7 @@ extern crate serde;
 #[cfg(not(feature = "stable"))]
 use std::convert;
 
+use std::ascii::AsciiExt;
 use std::borrow;
 use std::cmp;
 use std::fmt;
@@ -146,7 +151,7 @@ pub type Result<T> = result::Result<T, Error>;
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Jid<'a> {
-    local: &'a str,
+    local: borrow::Cow<'a, str>,
     domain: borrow::Cow<'a, str>,
     resource: &'a str,
 }
@@ -197,11 +202,30 @@ impl<'a> Jid<'a> {
            })
     }
 
-    fn process_local(local: &'a str) -> Result<&'a str> {
+    fn process_local(local: &'a str) -> Result<borrow::Cow<'a, str>> {
+        // TODO: This should all be handled by the PRECIS UsernameCaseMapped profile.
+        let local: borrow::Cow<'a, str> = if local.is_ascii() {
+            // ASCII fast path
+            // TODO: JIDs aren't likely to have long localparts; are multiple scans worth it just
+            // to maybe avoid an allocation? Probably not.
+            #[cfg(not(feature = "stable"))]
+            let is_lower = local.is_ascii_lowercase();
+            #[cfg(feature = "stable")]
+            let is_lower = local.bytes().find(|&c| b'A' <= c && c <= b'Z').is_none();
+
+            if is_lower {
+                local.into()
+            } else {
+                local.to_ascii_lowercase().into()
+            }
+        } else {
+            // Contains characters outside the ASCII range (needs NFC)
+            local.chars().flat_map(|c| c.to_lowercase()).nfc().collect()
+        };
         if local.len() > 1023 {
             return Err(Error::LongLocal);
         }
-        Ok(local)
+        return Ok(local);
     }
 
     fn process_domain(domain: &'a str) -> Result<borrow::Cow<'a, str>> {
@@ -535,7 +559,7 @@ impl<'a> Jid<'a> {
     pub fn local(&self) -> Option<&str> {
         match self.local.len() {
             0 => None,
-            _ => Some(self.local),
+            _ => Some(&(self.local[..])),
         }
     }
 
@@ -598,7 +622,7 @@ impl<'a> Jid<'a> {
     /// ```
     pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> Jid<'a> {
         Jid {
-            local: local,
+            local: local.into(),
             domain: domain.into(),
             resource: resource,
         }

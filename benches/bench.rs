@@ -57,3 +57,8 @@ fn string_full(b: &mut Bencher) {
 fn new_full(b: &mut Bencher) {
     b.iter(|| Jid::new("juliet", "example.com", "test"));
 }
+
+#[bench]
+fn new_full_nfc(b: &mut Bencher) {
+    b.iter(|| Jid::new("\u{212B}\u{212B}\u{212B}", "@example.net", "test"));
+}
