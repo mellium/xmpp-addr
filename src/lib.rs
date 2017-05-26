@@ -667,12 +667,14 @@ impl<'a> Jid<'a> {
 /// ```
 impl<'a> fmt::Display for Jid<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if !self.local.is_empty() && !self.resource.is_empty() {
-            return write!(f, "{}@{}/{}", self.local, self.domain, self.resource);
-        } else if !self.local.is_empty() {
-            return write!(f, "{}@{}", self.local, self.domain);
+        if !self.local.is_empty() {
+            write!(f, "{}@", self.local)?;
         }
-        write!(f, "{}/{}", self.domain, self.resource)
+        write!(f, "{}", self.domain)?;
+        if !self.resource.is_empty() {
+            write!(f, "/{}", self.resource)?;
+        }
+        Ok(())
     }
 }
 

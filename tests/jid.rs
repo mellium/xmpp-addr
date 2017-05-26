@@ -104,6 +104,21 @@ test_invalid_addrs!(invalid_00: "test@/test",
                    invalid_22: r#"["#);
 
 #[test]
+fn test_display() {
+    let jid = Jid::from_str("domain/res").unwrap();
+    assert_eq!(jid.to_string(), "domain/res");
+
+    let jid = Jid::from_str("local@domain/res").unwrap();
+    assert_eq!(jid.to_string(), "local@domain/res");
+
+    let jid = Jid::from_str("local@domain").unwrap();
+    assert_eq!(jid.to_string(), "local@domain");
+
+    let jid = Jid::from_str("domain").unwrap();
+    assert_eq!(jid.to_string(), "domain");
+}
+
+#[test]
 fn test_send() {
     fn assert_send<T: Send>() {}
     assert_send::<Jid>();
