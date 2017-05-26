@@ -525,7 +525,6 @@ impl<'a> Jid<'a> {
                 // RFC 7622 §3.3.1 provides a small table of characters which are still not allowed in
                 // localpart's even though the IdentifierClass base class and the UsernameCaseMapped
                 // profile don't forbid them; disallow them here.
-                // if lpart.contains(&['"', '&', '\'', '/', ':', '<', '>', '@', '`']) {
                 if s[0..i].contains(&['"', '&', '\'', '/', ':', '<', '>', '@', '`'][..]) {
                     return Err(Error::ForbiddenChars);
                 }
