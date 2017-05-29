@@ -31,13 +31,33 @@
 //!
 //! # Examples
 //!
-//! ## Basic usage
+//! ## From parts (stable)
 //!
 //! ```rust
 //! # use xmpp_addr::Jid;
 //! # fn try_main() -> Result<(), xmpp_addr::Error> {
 //! let j = Jid::new("feste", "example.net", "")?;
 //! assert_eq!(j, "feste@example.net");
+//! #     Ok(())
+//! # }
+//! # fn main() {
+//! #   try_main().unwrap();
+//! # }
+//! ```
+//!
+//! ## From parts (nightly)
+//!
+#![cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#![cfg_attr(not(feature = "stable"), doc = " ```rust")]
+//! #![feature(try_from)]
+//! # use std::convert::{ TryInto, TryFrom };
+//! # use xmpp_addr::Jid;
+//! # fn try_main() -> Result<(), xmpp_addr::Error> {
+//! let j: Jid = ("feste", "example.net").try_into()?;
+//! assert_eq!(j, "feste@example.net");
+//!
+//! let j = Jid::try_from(("feste", "example.net", "avsgasje"))?;
+//! assert_eq!(j, "feste@example.net/avsgasje");
 //! #     Ok(())
 //! # }
 //! # fn main() {
