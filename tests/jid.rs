@@ -15,7 +15,7 @@ use xmpp_addr::{Jid, Error};
 #[cfg(not(feature = "stable"))]
 use std::convert::TryFrom;
 
-use std::net::{Ipv6Addr, Ipv4Addr};
+use std::net::{Ipv6Addr, Ipv4Addr, IpAddr};
 
 macro_rules! test_valid_addrs {
     ( $( $num:ident: [$jid:expr, $local:expr, $domain:expr, $res:expr] ),+ ) => {
@@ -129,6 +129,14 @@ fn test_display() {
     let v4: Ipv4Addr = "127.0.0.1".parse().unwrap();
     let jid: Jid = v4.into();
     assert_eq!(jid.to_string(), "127.0.0.1");
+
+    let addr: IpAddr = IpAddr::V4(v4);
+    let jid: Jid = addr.into();
+    assert_eq!(jid.to_string(), "127.0.0.1");
+
+    let addr: IpAddr = IpAddr::V6(v6);
+    let jid: Jid = addr.into();
+    assert_eq!(jid.to_string(), "[::1]");
 }
 
 #[test]

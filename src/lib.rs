@@ -801,6 +801,16 @@ impl<'a> convert::From<net::Ipv6Addr> for Jid<'a> {
     }
 }
 
+/// Creates a JID from an IP address.
+impl<'a> convert::From<net::IpAddr> for Jid<'a> {
+    fn from(addr: net::IpAddr) -> Jid<'a> {
+        match addr {
+            net::IpAddr::V6(v6) => v6.into(),
+            net::IpAddr::V4(v4) => v4.into(),
+        }
+    }
+}
+
 /// Allows JIDs to be compared with strings.
 ///
 /// **This is expensive**. The JID is first converted into its canonical string representation and
