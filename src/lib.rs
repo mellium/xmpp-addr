@@ -96,7 +96,6 @@ use unicode_normalization::UnicodeNormalization;
 #[macro_use]
 extern crate serde;
 
-#[cfg(not(feature = "stable"))]
 use std::convert;
 
 use std::ascii::AsciiExt;
@@ -777,6 +776,28 @@ impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
 
     fn try_from(s: &'a str) -> result::Result<Self, Self::Error> {
         Jid::from_str(s)
+    }
+}
+
+/// Creates a JID from an IPv4 address.
+impl<'a> convert::From<net::Ipv4Addr> for Jid<'a> {
+    fn from(addr: net::Ipv4Addr) -> Jid<'a> {
+        return Jid {
+                   local: "".into(),
+                   domain: format!("{}", addr).into(),
+                   resource: "".into(),
+               };
+    }
+}
+
+/// Creates a JID from an IPv6 address.
+impl<'a> convert::From<net::Ipv6Addr> for Jid<'a> {
+    fn from(addr: net::Ipv6Addr) -> Jid<'a> {
+        return Jid {
+                   local: "".into(),
+                   domain: format!("[{}]", addr).into(),
+                   resource: "".into(),
+               };
     }
 }
 
