@@ -71,9 +71,9 @@
 //! # use xmpp_addr::Jid;
 //! # fn try_main() -> Result<(), xmpp_addr::Error> {
 //! let j = Jid::from_str("juliet@example.net/balcony")?;
-//! assert_eq!(j.localpart().unwrap(), "juliet");
+//! assert_eq!(j.localpart(), Some("juliet"));
 //! assert_eq!(j.domainpart(), "example.net");
-//! assert_eq!(j.resourcepart().unwrap(), "balcony");
+//! assert_eq!(j.resourcepart(), Some("balcony"));
 //! #     Ok(())
 //! # }
 //! # fn main() {
@@ -607,7 +607,7 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("mercutio@example.net/rp")?;
-    /// assert_eq!(j.localpart().unwrap(), "mercutio");
+    /// assert_eq!(j.localpart(), Some("mercutio"));
     ///
     /// let j = Jid::from_str("example.net/rp")?;
     /// assert!(j.localpart().is_none());
@@ -651,7 +651,7 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("example.net/rp")?;
-    /// assert_eq!(j.resourcepart().unwrap(), "rp");
+    /// assert_eq!(j.resourcepart(), Some("rp"));
     ///
     /// let j = Jid::from_str("feste@example.net")?;
     /// assert!(j.resourcepart().is_none());
