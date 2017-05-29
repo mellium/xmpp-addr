@@ -51,9 +51,9 @@
 //! # use xmpp_addr::Jid;
 //! # fn try_main() -> Result<(), xmpp_addr::Error> {
 //! let j = Jid::from_str("juliet@example.net/balcony")?;
-//! assert_eq!(j.local().unwrap(), "juliet");
-//! assert_eq!(j.domain(), "example.net");
-//! assert_eq!(j.resource().unwrap(), "balcony");
+//! assert_eq!(j.localpart().unwrap(), "juliet");
+//! assert_eq!(j.domainpart(), "example.net");
+//! assert_eq!(j.resourcepart().unwrap(), "balcony");
 //! #     Ok(())
 //! # }
 //! # fn main() {
@@ -337,6 +337,31 @@ impl<'a> Jid<'a> {
         }
     }
 
+    /// Consumes a JID to construct a JID with only the domainpart.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// # use xmpp_addr::Jid;
+    /// # fn try_main() -> Result<(), xmpp_addr::Error> {
+    /// let j = Jid::new("feste", "example.net", "res")?;
+    /// assert_eq!(j.domain(), "example.net");
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
+    /// ```
+    pub fn domain(self) -> Jid<'a> {
+        Jid {
+            local: "".into(),
+            domain: self.domain,
+            resource: "".into(),
+        }
+    }
+
     /// Consumes a JID to construct a new JID with the given localpart.
     ///
     /// # Errors
@@ -562,17 +587,17 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("mercutio@example.net/rp")?;
-    /// assert_eq!(j.local().unwrap(), "mercutio");
+    /// assert_eq!(j.localpart().unwrap(), "mercutio");
     ///
     /// let j = Jid::from_str("example.net/rp")?;
-    /// assert!(j.local().is_none());
+    /// assert!(j.localpart().is_none());
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn local(&self) -> Option<&str> {
+    pub fn localpart(&self) -> Option<&str> {
         match self.local.len() {
             0 => None,
             _ => Some(&(self.local[..])),
@@ -587,14 +612,14 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("mercutio@example.net/rp")?;
-    /// assert_eq!(j.domain(), "example.net");
+    /// assert_eq!(j.domainpart(), "example.net");
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn domain(&self) -> &str {
+    pub fn domainpart(&self) -> &str {
         &(self.domain)
     }
 
@@ -606,17 +631,17 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("example.net/rp")?;
-    /// assert_eq!(j.resource().unwrap(), "rp");
+    /// assert_eq!(j.resourcepart().unwrap(), "rp");
     ///
     /// let j = Jid::from_str("feste@example.net")?;
-    /// assert!(j.resource().is_none());
+    /// assert!(j.resourcepart().is_none());
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn resource(&self) -> Option<&str> {
+    pub fn resourcepart(&self) -> Option<&str> {
         match self.resource.len() {
             0 => None,
             _ => Some(&(self.resource[..])),

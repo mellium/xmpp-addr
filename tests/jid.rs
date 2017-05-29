@@ -29,12 +29,12 @@ macro_rules! test_valid_addrs {
                 #[cfg(feature = "stable")]
                 let jid = Jid::from_str(v[0]).expect("Error parsing JID");
 
-                match jid.local() {
+                match jid.localpart() {
                     None => assert_eq!(v[1], ""),
                     Some(l) =>  assert_eq!(v[1], l)
                 }
-                assert_eq!(v[2], jid.domain());
-                match jid.resource() {
+                assert_eq!(v[2], jid.domainpart());
+                match jid.resourcepart() {
                     None => assert_eq!(v[3], ""),
                     Some(r) =>  assert_eq!(v[3], r)
                 }
