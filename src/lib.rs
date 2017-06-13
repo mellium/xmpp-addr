@@ -816,6 +816,88 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
     }
 }
 
+/// Create a bare JID from a 2-tuple where the localpart is optional.
+///
+/// # Errors
+///
+/// If the first item in the tuple is not a valid localpart or the second item in the tuple fails
+/// IDNA processing or is not a valid IPv6 address, this function returns an [error variant].
+///
+/// [error variant]: ./enum.Error.html
+///
+/// # Examples
+///
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+/// #![feature(try_from)]
+/// # use std::convert::TryInto;
+/// # use xmpp_addr::{Jid, Result};
+/// # fn try_main() -> std::result::Result<(), xmpp_addr::Error> {
+/// let j: Jid = (Some("mercutio"), "example.net").try_into()?;
+/// assert_eq!(j, "mercutio@example.net");
+///
+/// let j: Jid = (None, "example.net").try_into()?;
+/// assert_eq!(j, "example.net");
+///
+/// let j: Result<Jid> = (Some(""), "example.net").try_into();
+/// assert!(j.is_err());
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
+/// ```
+#[cfg(not(feature = "stable"))]
+impl<'a> convert::TryFrom<(Option<&'a str>, &'a str)> for Jid<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (Option<&'a str>, &'a str)) -> result::Result<Self, Self::Error> {
+        Jid::new(parts.0, parts.1, None)
+    }
+}
+
+/// Create a JID with a domain and resourcepart from a 2-tuple where the resourcepart is optional.
+/// Generally speaking, this is not as useful as the other `TryFrom` implementatoins, but is
+/// included for completenesses sake or for custom clustering implementations.
+///
+/// # Errors
+///
+/// If the first item in the tuplefails IDNA processing or is not a valid IPv6 address or the
+/// second item in the tuple is not a valid resourcepart, this function returns an [error variant].
+///
+/// [error variant]: ./enum.Error.html
+///
+/// # Examples
+///
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+/// #![feature(try_from)]
+/// # use std::convert::TryInto;
+/// # use xmpp_addr::{Jid, Result};
+/// # fn try_main() -> std::result::Result<(), xmpp_addr::Error> {
+/// let j: Jid = ("example.net", Some("node1432")).try_into()?;
+/// assert_eq!(j, "example.net/node1432");
+///
+/// let j: Jid = ("example.net", None).try_into()?;
+/// assert_eq!(j, "example.net");
+///
+/// let j: Result<Jid> = ("example.net", Some("")).try_into();
+/// assert!(j.is_err());
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
+/// ```
+#[cfg(not(feature = "stable"))]
+impl<'a> convert::TryFrom<(&'a str, Option<&'a str>)> for Jid<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (&'a str, Option<&'a str>)) -> result::Result<Self, Self::Error> {
+        Jid::new(None, parts.0, parts.1)
+    }
+}
+
 /// Creates a full JID from a 3-tuple.
 ///
 /// # Errors
@@ -851,6 +933,48 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
 
     fn try_from(parts: (&'a str, &'a str, &'a str)) -> result::Result<Self, Self::Error> {
         Jid::new(Some(parts.0), parts.1, Some(parts.2))
+    }
+}
+
+/// Creates a full JID from a 3-tuple where the localpart and resourcepart are optional.
+///
+/// # Errors
+///
+/// If the first item in the tuple is not a valid localpart, the second item in the tuple fails
+/// IDNA processing or is not a valid IPv6 address, or the third item in the tuple is not a valid
+/// domainpart, this function returns an [error variant].
+///
+/// [error variant]: ./enum.Error.html
+///
+/// # Examples
+///
+#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
+#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+/// #![feature(try_from)]
+/// # use std::convert::TryInto;
+/// # use xmpp_addr::{Jid, Result};
+/// # fn try_main() -> std::result::Result<(), xmpp_addr::Error> {
+/// let j: Jid = (Some("mercutio"), "example.net", Some("nctYeCzm")).try_into()?;
+/// assert_eq!(j, "mercutio@example.net/nctYeCzm");
+///
+/// let j: Jid = (Some("mercutio"), "example.net", None).try_into()?;
+/// assert_eq!(j, "mercutio@example.net");
+///
+/// let j: Result<Jid> = (Some("mercutio"), "example.net", Some("")).try_into();
+/// assert!(j.is_err());
+/// #     Ok(())
+/// # }
+/// # fn main() {
+/// #   try_main().unwrap();
+/// # }
+/// ```
+#[cfg(not(feature = "stable"))]
+impl<'a> convert::TryFrom<(Option<&'a str>, &'a str, Option<&'a str>)> for Jid<'a> {
+    type Error = Error;
+
+    fn try_from(parts: (Option<&'a str>, &'a str, Option<&'a str>))
+                -> result::Result<Self, Self::Error> {
+        Jid::new(parts.0, parts.1, parts.2)
     }
 }
 
