@@ -104,7 +104,7 @@
 #![cfg_attr(not(feature = "stable"), feature(try_from))]
 #![cfg_attr(not(feature = "stable"), feature(ascii_ctype))]
 
-#![doc(html_root_url = "https://docs.rs/xmpp-addr/0.9.1")]
+#![doc(html_root_url = "https://docs.rs/xmpp-addr/0.10.0")]
 
 extern crate idna;
 extern crate unicode_normalization;
