@@ -181,7 +181,7 @@ impl<'a> Jid<'a> {
     /// # Errors
     ///
     /// This function performs a "naive" string split and does not perform any validation of the
-    /// individual parts other than to make sure that required parts still exist. For example
+    /// individual parts other than to make sure that required parts exist. For example
     /// "@example.com" will return an error ([`EmptyLocal`]), but "%@example.com" will not (even
     /// though "%" is not a valid localpart). The length of localparts and resourceparts is also
     /// not checked (other than if they're empty). This is because when creating an actual JID it
@@ -193,10 +193,10 @@ impl<'a> Jid<'a> {
     ///
     /// Possible errors include:
     ///
-    ///   - [`EmptyJid`] (`""`)
-    ///   - [`EmptyLocal`] (`"@example.com"`)
-    ///   - [`EmptyResource`] (`"example.com/"`)
-    ///   - [`ShortDomain`] (`"a"`, `"foo@/bar"`)
+    ///   - [`EmptyJid`]  \(eg. `""`)
+    ///   - [`EmptyLocal`]  \(`"@example.com"`)
+    ///   - [`EmptyResource`]  \(`"example.com/"`)
+    ///   - [`ShortDomain`]  \(`"a"`, `"foo@/bar"`)
     ///
     /// [error variant]: ./enum.Error.html
     /// [`EmptyJid`]: ./enum.Error.html#EmptyJid.v
