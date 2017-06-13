@@ -431,10 +431,11 @@ impl<'a> Jid<'a> {
                 .nfc()
                 .collect()
         };
-        if res.len() > 1023 {
-            return Err(Error::LongResource);
+        match res.len() {
+            0 => Err(Error::EmptyResource),
+            r if r > 1023 => Err(Error::LongResource),
+            _ => Ok(res),
         }
-        Ok(res)
     }
 
     /// Construct a JID containing only a domain part.
@@ -793,10 +794,13 @@ impl<'a> fmt::Display for Jid<'a> {
 #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
-/// # use xmpp_addr::Jid;
-/// # fn try_main() -> Result<(), xmpp_addr::Error> {
+/// # use xmpp_addr::{Jid, Result};
+/// # fn try_main() -> std::result::Result<(), xmpp_addr::Error> {
 /// let j: Jid = ("mercutio", "example.net").try_into()?;
 /// assert_eq!(j, "mercutio@example.net");
+///
+/// let j: Result<Jid> = ("", "example.net").try_into();
+/// assert!(j.is_err());
 /// #     Ok(())
 /// # }
 /// # fn main() {
@@ -828,10 +832,13 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
 #[cfg_attr(not(feature = "stable"), doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
-/// # use xmpp_addr::Jid;
-/// # fn try_main() -> Result<(), xmpp_addr::Error> {
+/// # use xmpp_addr::{Jid, Result};
+/// # fn try_main() -> std::result::Result<(), xmpp_addr::Error> {
 /// let j: Jid = ("mercutio", "example.net", "nctYeCzm").try_into()?;
 /// assert_eq!(j, "mercutio@example.net/nctYeCzm");
+///
+/// let j: Result<Jid> = ("mercutio", "example.net", "").try_into();
+/// assert!(j.is_err());
 /// #     Ok(())
 /// # }
 /// # fn main() {
