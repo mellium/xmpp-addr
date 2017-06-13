@@ -36,7 +36,7 @@
 //! ```rust
 //! # use xmpp_addr::Jid;
 //! # fn try_main() -> Result<(), xmpp_addr::Error> {
-//! let j = Jid::new("feste", "example.net", "")?;
+//! let j = Jid::new(Some("feste"), "example.net", None)?;
 //! assert_eq!(j, "feste@example.net");
 //! #     Ok(())
 //! # }
@@ -176,6 +176,136 @@ pub struct Jid<'a> {
 }
 
 impl<'a> Jid<'a> {
+    /// Splits a JID formatted as a string into its localpart, domainpart, and resourcepart.
+    /// The localpart and resourcepart are optional, but the domainpart is always returned.
+    ///
+    /// # Errors
+    ///
+    /// This function performs a "naive" string split and does not perform any validation of the
+    /// individual parts other than to make sure that required parts still exist. For example
+    /// "@example.com" will return an error ([`EmptyLocal`]), but "%@example.com" will not (even
+    /// though "%" is not a valid localpart). The length of localparts and resourceparts is also
+    /// not checked (other than if they're empty). This is because when creating an actual JID it
+    /// is possible for certain Unicode characters to be canonicalized into a shorter length
+    /// encoding, meaning that a part that was previously too long may suddenly fit in the maximum
+    /// length. [`ShortDomain`] may be returned because we know that domains will never become
+    /// longer after performing IDNA2008 operations, but [`LongDomain`] may not be returned for the
+    /// same reasons as mentioned above.
+    ///
+    /// Possible errors include:
+    ///
+    ///   - [`EmptyJid`] (`""`)
+    ///   - [`EmptyLocal`] (`"@example.com"`)
+    ///   - [`EmptyResource`] (`"example.com/"`)
+    ///   - [`ShortDomain`] (`"a"`, `"foo@/bar"`)
+    ///
+    /// [error variant]: ./enum.Error.html
+    /// [`EmptyJid`]: ./enum.Error.html#EmptyJid.v
+    /// [`EmptyLocal`]: ./enum.Error.html#EmptyLocal.v
+    /// [`EmptyResource`]: ./enum.Error.html#EmptyResource.v
+    /// [`ShortDomain`]: ./enum.Error.html#ShortDomain.v
+    /// [`LongDomain`]: ./enum.Error.html#LongDomain.v
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// # use xmpp_addr::Jid;
+    /// # fn try_main() -> Result<(), xmpp_addr::Error> {
+    /// let (lp, dp, rp) = Jid::split("feste@example.net")?;
+    /// assert_eq!(lp, Some("feste"));
+    /// assert_eq!(dp, "example.net");
+    /// assert_eq!(rp, None);
+    /// #     Ok(())
+    /// # }
+    /// # fn main() {
+    /// #   try_main().unwrap();
+    /// # }
+    /// ```
+    pub fn split(s: &'a str) -> Result<(Option<&'a str>, &'a str, Option<&'a str>)> {
+        if s == "" {
+            return Err(Error::EmptyJid);
+        }
+
+        // RFC 7622 §3.1.  Fundamentals:
+        //
+        //    Implementation Note: When dividing a JID into its component parts,
+        //    an implementation needs to match the separator characters '@' and
+        //    '/' before applying any transformation algorithms, which might
+        //    decompose certain Unicode code points to the separator characters.
+        //
+        // so let's do that now. First we'll parse the domainpart using the rules
+        // defined in §3.2:
+        //
+        //    The domainpart of a JID is the portion that remains once the
+        //    following parsing steps are taken:
+        //
+        //    1.  Remove any portion from the first '/' character to the end of the
+        //        string (if there is a '/' character present).
+
+        let mut chars = s.char_indices();
+        let sep = chars.find(|&c| match c {
+                                 (_, '@') | (_, '/') => true,
+                                 _ => false,
+                             });
+
+        let (lpart, dpart, rpart) = match sep {
+            // If there are no part separators at all, the entire string is a domainpart.
+            None => (None, s, None),
+            // A '/' exists, but the domain part is too long.
+            Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
+            // The resource part exists (there's a '/') but it's empty (the first '/' is the last
+            // character).
+            Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
+            // There is a resource part, and we did not find a localpart (the first separator found
+            // was the first '/').
+            Some((i, '/')) => (None, &s[0..i], Some(&s[i + 1..])),
+            // The JID starts with the '@' sign
+            Some((i, '@')) if i == 0 => return Err(Error::EmptyLocal),
+            // The JID ends with the '@' sign
+            Some((i, '@')) if i + 1 == s.len() => return Err(Error::ShortDomain),
+            // We found a local part, so keep searching to try and find a resource part.
+            Some((i, '@')) => {
+                // Continue looking for a '/'.
+                let slash = chars.find(|&c| match c {
+                                           (_, '/') => true,
+                                           _ => false,
+                                       });
+
+                // RFC 7622 §3.3.1 provides a small table of characters which are still not allowed in
+                // localpart's even though the IdentifierClass base class and the UsernameCaseMapped
+                // profile don't forbid them; disallow them here.
+                if s[0..i].contains(&['"', '&', '\'', '/', ':', '<', '>', '@', '`'][..]) {
+                    return Err(Error::ForbiddenChars);
+                }
+                match slash {
+                    // This is a bare JID.
+                    None => (Some(&s[0..i]), &s[i + 1..], None),
+                    // There is a '/', but it's immediately after the '@' (or there is a short
+                    // domain part between them).
+                    Some((j, _)) if j - i < 3 => return Err(Error::ShortDomain),
+                    // The resource part exists (there's a '/') but it's empty.
+                    Some((j, _)) if s.len() == j + 1 => return Err(Error::EmptyResource),
+                    // This is a full JID.
+                    Some((j, _)) => (Some(&s[0..i]), &s[i + 1..j], Some(&s[j + 1..])),
+                }
+            }
+            _ => unreachable!(),
+        };
+
+        // We'll throw out any trailing dots on domainparts, since they're ignored:
+        //
+        //    If the domainpart includes a final character considered to be a label
+        //    separator (dot) by [RFC1034], this character MUST be stripped from
+        //    the domainpart before the JID of which it is a part is used for the
+        //    purpose of routing an XML stanza, comparing against another JID, or
+        //    constructing an XMPP URI or IRI [RFC5122].  In particular, such a
+        //    character MUST be stripped before any other canonicalization steps
+        //    are taken.
+        Ok((lpart, dpart.trim_right_matches('.'), rpart))
+    }
+
     /// Constructs a JID from its constituent parts. The localpart is generally the username of a
     /// user on a particular server, the domainpart is a domain, hostname, or IP address where the
     /// user or entity resides, and the resourcepart identifies a specific client. Everything but
@@ -196,7 +326,7 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
-    /// let j = Jid::new("feste", "example.net", "")?;
+    /// let j = Jid::new(Some("feste"), "example.net", None)?;
     /// assert_eq!(j, "feste@example.net");
     /// #     Ok(())
     /// # }
@@ -204,19 +334,22 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn new(local: &'a str, domain: &'a str, resource: &'a str) -> Result<Jid<'a>> {
+    pub fn new(local: Option<&'a str>,
+               domain: &'a str,
+               resource: Option<&'a str>)
+               -> Result<Jid<'a>> {
         Ok(Jid {
-               local: match Jid::process_local(local) {
-                   Err(err) => return Err(err),
-                   Ok(l) => l,
+               local: match local {
+                   Some(l) => Jid::process_local(l)?,
+                   None => "".into(),
                },
                domain: match Jid::process_domain(domain) {
                    Err(err) => return Err(err),
                    Ok(d) => d,
                },
-               resource: match Jid::process_resource(resource) {
-                   Err(err) => return Err(err),
-                   Ok(r) => r,
+               resource: match resource {
+                   Some(r) => Jid::process_resource(r)?,
+                   None => "".into(),
                },
            })
     }
@@ -241,10 +374,11 @@ impl<'a> Jid<'a> {
             // Contains characters outside the ASCII range (needs NFC)
             local.chars().flat_map(|c| c.to_lowercase()).nfc().collect()
         };
-        if local.len() > 1023 {
-            return Err(Error::LongLocal);
+        match local.len() {
+            0 => Err(Error::EmptyLocal),
+            l if l > 1023 => Err(Error::LongLocal),
+            _ => Ok(local),
         }
-        return Ok(local);
     }
 
     fn process_domain(domain: &'a str) -> Result<borrow::Cow<'a, str>> {
@@ -329,7 +463,7 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn from_domain(domain: &'a str) -> Result<Jid<'a>> {
-        Jid::new("", domain, "")
+        Jid::new(None, domain, None)
     }
 
     /// Consumes a JID to construct a bare JID (a JID without a resourcepart).
@@ -341,7 +475,7 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
-    /// let j = Jid::new("feste", "example.net", "res")?;
+    /// let j = Jid::new(Some("feste"), "example.net", Some("res"))?;
     /// assert_eq!(j.bare(), "feste@example.net");
     /// #     Ok(())
     /// # }
@@ -366,7 +500,7 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
-    /// let j = Jid::new("feste", "example.net", "res")?;
+    /// let j = Jid::new(Some("feste"), "example.net", Some("res"))?;
     /// assert_eq!(j.domain(), "example.net");
     /// #     Ok(())
     /// # }
@@ -398,21 +532,21 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("example.net")?;
-    /// assert_eq!(j.with_local("feste")?, "feste@example.net");
+    /// assert_eq!(j.with_local(Some("feste"))?, "feste@example.net");
     ///
     /// let j = Jid::from_str("iago@example.net")?;
-    /// assert_eq!(j.with_local("")?, "example.net");
+    /// assert_eq!(j.with_local(None)?, "example.net");
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn with_local(self, local: &'a str) -> Result<Jid<'a>> {
+    pub fn with_local(self, local: Option<&'a str>) -> Result<Jid<'a>> {
         Ok(Jid {
-               local: match Jid::process_local(local) {
-                   Err(err) => return Err(err),
-                   Ok(l) => l,
+               local: match local {
+                   Some(l) => Jid::process_local(l)?,
+                   None => "".into(),
                },
                domain: self.domain,
                resource: self.resource,
@@ -468,22 +602,26 @@ impl<'a> Jid<'a> {
     ///
     /// ```rust
     /// # use xmpp_addr::Jid;
+    /// # use xmpp_addr::Error;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("feste@example.net")?;
-    /// assert_eq!(j.with_resource("1234")?, "feste@example.net/1234");
+    /// assert_eq!(j.with_resource(Some("1234"))?, "feste@example.net/1234");
+    ///
+    /// let j = Jid::from_str("feste@example.net/1234")?;
+    /// assert_eq!(j.with_resource(None)?, "feste@example.net");
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn with_resource(self, resource: &'a str) -> Result<Jid<'a>> {
+    pub fn with_resource(self, resource: Option<&'a str>) -> Result<Jid<'a>> {
         Ok(Jid {
                local: self.local,
                domain: self.domain,
-               resource: match Jid::process_resource(resource) {
-                   Err(err) => return Err(err),
-                   Ok(r) => r,
+               resource: match resource {
+                   Some(r) => Jid::process_resource(r)?,
+                   None => "".into(),
                },
            })
     }
@@ -515,88 +653,8 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn from_str(s: &'a str) -> Result<Jid<'a>> {
-        if s == "" {
-            return Err(Error::EmptyJid);
-        }
-
-        // RFC 7622 §3.1.  Fundamentals:
-        //
-        //    Implementation Note: When dividing a JID into its component parts,
-        //    an implementation needs to match the separator characters '@' and
-        //    '/' before applying any transformation algorithms, which might
-        //    decompose certain Unicode code points to the separator characters.
-        //
-        // so let's do that now. First we'll parse the domainpart using the rules
-        // defined in §3.2:
-        //
-        //    The domainpart of a JID is the portion that remains once the
-        //    following parsing steps are taken:
-        //
-        //    1.  Remove any portion from the first '/' character to the end of the
-        //        string (if there is a '/' character present).
-
-        let mut chars = s.char_indices();
-        let sep = chars.find(|&c| match c {
-                                 (_, '@') | (_, '/') => true,
-                                 _ => false,
-                             });
-
-        let (lpart, dpart, rpart) = match sep {
-            // No separator was found; this is a domain-only JID.
-            None => ("", s, ""),
-            // A '/' exists, but the domain part is too long.
-            Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
-            // The resource part exists (there's a '/') but it's empty (the first '/' is the last
-            // character).
-            Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
-            // There is a resource part, and we did not find a localpart (the first separator found
-            // was the first '/').
-            Some((i, '/')) => ("", &s[0..i], &s[i + 1..]),
-            // The JID starts with the '@' sign
-            Some((i, '@')) if i == 0 => return Err(Error::EmptyLocal),
-            // The JID has an '@' sign, but the local part is too long.
-            Some((i, '@')) if i > 1023 => return Err(Error::LongLocal),
-            // The JID ends with the '@' sign
-            Some((i, '@')) if i + 1 == s.len() => return Err(Error::ShortDomain),
-            // We found a local part, so keep searching to try and find a resource part.
-            Some((i, '@')) => {
-                // Continue looking for a '/'.
-                let slash = chars.find(|&c| match c {
-                                           (_, '/') => true,
-                                           _ => false,
-                                       });
-
-                // RFC 7622 §3.3.1 provides a small table of characters which are still not allowed in
-                // localpart's even though the IdentifierClass base class and the UsernameCaseMapped
-                // profile don't forbid them; disallow them here.
-                if s[0..i].contains(&['"', '&', '\'', '/', ':', '<', '>', '@', '`'][..]) {
-                    return Err(Error::ForbiddenChars);
-                }
-                match slash {
-                    // This is a bare JID.
-                    None => (&s[0..i], &s[i + 1..], ""),
-                    // There is a '/', but it's immediately after the '@' (or there is a short
-                    // domain part between them).
-                    Some((j, _)) if j - i < 3 => return Err(Error::ShortDomain),
-                    // The resource part exists (there's a '/') but it's empty.
-                    Some((j, _)) if s.len() == j + 1 => return Err(Error::EmptyResource),
-                    // This is a full JID.
-                    Some((j, _)) => (&s[0..i], &s[i + 1..j], &s[j + 1..]),
-                }
-            }
-            _ => unreachable!(),
-        };
-
-        // We'll throw out any trailing dots on domainparts, since they're ignored:
-        //
-        //    If the domainpart includes a final character considered to be a label
-        //    separator (dot) by [RFC1034], this character MUST be stripped from
-        //    the domainpart before the JID of which it is a part is used for the
-        //    purpose of routing an XML stanza, comparing against another JID, or
-        //    constructing an XMPP URI or IRI [RFC5122].  In particular, such a
-        //    character MUST be stripped before any other canonicalization steps
-        //    are taken.
-        Jid::new(lpart, dpart.trim_right_matches('.'), rpart)
+        let (lpart, dpart, rpart) = Jid::split(s)?;
+        Jid::new(lpart, dpart, rpart)
     }
 
     /// Returns the localpart of the JID in canonical form.
@@ -751,7 +809,7 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
     type Error = Error;
 
     fn try_from(parts: (&'a str, &'a str)) -> result::Result<Self, Self::Error> {
-        Jid::new(parts.0, parts.1, "")
+        Jid::new(Some(parts.0), parts.1, None)
     }
 }
 
@@ -786,7 +844,7 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
     type Error = Error;
 
     fn try_from(parts: (&'a str, &'a str, &'a str)) -> result::Result<Self, Self::Error> {
-        Jid::new(parts.0, parts.1, parts.2)
+        Jid::new(Some(parts.0), parts.1, Some(parts.2))
     }
 }
 

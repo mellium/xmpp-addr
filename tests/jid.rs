@@ -17,27 +17,63 @@ use std::convert::TryFrom;
 
 use std::net::{Ipv6Addr, Ipv4Addr, IpAddr};
 
+macro_rules! test_valid_split {
+    ( $( $num:ident: [ $jid:expr, $local:expr, $domain:expr, $res:expr ] ),+ ) => {
+        $(
+            #[test]
+            fn $num() {
+                let j = $jid;
+                let parts = Jid::split(j.as_ref());
+                match parts {
+                    Ok(p) => {
+                        assert_eq!(p.0, $local);
+                        assert_eq!(p.1, $domain);
+                        assert_eq!(p.2, $res);
+                    },
+                    Err(e) => panic!(format!("Expected split to be valid, but got err: {:?}", e)),
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! test_invalid_split {
+    ( $( $num:ident: [ $jid:expr, $err:expr ] ),+ ) => {
+        $(
+            #[test]
+            fn $num() {
+                match Jid::split($jid) {
+                    Err(_) => {
+                        // TODO: Make sure this is the correct error.
+                        // It's hard to test this right now because of:
+                        // https://github.com/rust-lang/rust/issues/12832
+                        let _ = $err;
+                    },
+                    _ => panic!("Errors did not match"),
+                }
+            }
+        )*
+    };
+}
+
 macro_rules! test_valid_addrs {
     ( $( $num:ident: [$jid:expr, $local:expr, $domain:expr, $res:expr] ),+ ) => {
         $(
             #[test]
             fn $num() {
-                let v = vec![$jid, $local, $domain, $res];
+                let j: &str = $jid;
+                let lp: Option<&str> = $local;
+                let dp = $domain;
+                let rp: Option<&str> = $res;
 
                 #[cfg(not(feature = "stable"))]
-                let jid = Jid::try_from(v[0]).expect("Error parsing JID");
+                let jid = Jid::try_from(j).expect("Error parsing JID");
                 #[cfg(feature = "stable")]
-                let jid = Jid::from_str(v[0]).expect("Error parsing JID");
+                let jid = Jid::from_str(j).expect("Error parsing JID");
 
-                match jid.localpart() {
-                    None => assert_eq!(v[1], ""),
-                    Some(l) =>  assert_eq!(v[1], l)
-                }
-                assert_eq!(v[2], jid.domainpart());
-                match jid.resourcepart() {
-                    None => assert_eq!(v[3], ""),
-                    Some(r) =>  assert_eq!(v[3], r)
-                }
+                assert_eq!(lp, jid.localpart());
+                assert_eq!(dp, jid.domainpart());
+                assert_eq!(rp, jid.resourcepart());
             }
         )*
     };
@@ -64,24 +100,39 @@ macro_rules! test_invalid_addrs {
     };
 }
 
-test_valid_addrs!(valid_00: ["example.net", "", "example.net", ""],
-                 valid_01: ["example.net/rp", "", "example.net", "rp"],
-                 valid_02: ["mERCUTIo@example.net", "mercutio", "example.net", ""],
-                 valid_03: ["mercutio@example.net/rp", "mercutio", "example.net", "rp"],
-                 valid_04: ["mercutio@example.net/rp@rp", "mercutio", "example.net", "rp@rp"],
-                 valid_05: ["mercutio@example.net/rp@rp/rp", "mercutio", "example.net", "rp@rp/rp"],
-                 valid_06: ["mercutio@example.net/@", "mercutio", "example.net", "@"],
-                 valid_07: ["mercutio@example.net//@", "mercutio", "example.net", "/@"],
-                 valid_08: ["mercutio@example.net//@//", "mercutio", "example.net", "/@//"],
-                 valid_09: ["example.net.", "", "example.net", ""],
-                 valid_10: ["test@example.net.", "test", "example.net", ""],
-                 valid_11: ["test@example.net./rp", "test", "example.net", "rp"],
-                 valid_12: ["example.net./rp", "", "example.net", "rp"],
-                 valid_13: ["example.net.../rp", "", "example.net", "rp"],
-                 valid_14: ["[::1]", "", "[::1]", ""],
-                 valid_15: ["\u{212B}@example.net", "\u{00e5}", "example.net", ""]);
+test_valid_split!(valid_split_00: ["example.net", None, "example.net", None],
+                  valid_split_01: ["example.net/rp", None, "example.net", Some("rp")],
+                  valid_split_02: ["lp@example.net", Some("lp"), "example.net", None],
+                  valid_split_03: ["lp@example.net/rp", Some("lp"), "example.net", Some("rp")],
+                  valid_split_04: ["lp@example.net./rp", Some("lp"), "example.net", Some("rp")],
+                  valid_split_05: ["lp@example.net.../rp", Some("lp"), "example.net", Some("rp")],
+                  // TODO: Figure out how to take an Option<String> so that format can be used.
+                  valid_split_06: ["eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee@example.net", Some("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"), "example.net", None],
+                  valid_split_07: ["example.net/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", None, "example.net", Some("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")]);
 
-test_invalid_addrs!(invalid_00: "test@/test",
+test_invalid_split!(invalid_split_00: ["",             Error::EmptyJid],
+                    invalid_split_01: ["@example.net", Error::EmptyLocal],
+                    invalid_split_02: ["example.net/", Error::EmptyResource],
+                    invalid_split_04: ["lp@/rp",       Error::ShortDomain]);
+
+test_valid_addrs!(valid_00: ["example.net", None, "example.net", None],
+                 valid_01: ["example.net/rp", None, "example.net", Some("rp")],
+                 valid_02: ["mERCUTIo@example.net", Some("mercutio"), "example.net", None],
+                 valid_03: ["mercutio@example.net/rp", Some("mercutio"), "example.net", Some("rp")],
+                 valid_04: ["mercutio@example.net/rp@rp", Some("mercutio"), "example.net", Some("rp@rp")],
+                 valid_05: ["mercutio@example.net/rp@rp/rp", Some("mercutio"), "example.net", Some("rp@rp/rp")],
+                 valid_06: ["mercutio@example.net/@", Some("mercutio"), "example.net", Some("@")],
+                 valid_07: ["mercutio@example.net//@", Some("mercutio"), "example.net", Some("/@")],
+                 valid_08: ["mercutio@example.net//@//", Some("mercutio"), "example.net", Some("/@//")],
+                 valid_09: ["example.net.", None, "example.net", None],
+                 valid_10: ["test@example.net.", Some("test"), "example.net", None],
+                 valid_11: ["test@example.net./rp", Some("test"), "example.net", Some("rp")],
+                 valid_12: ["example.net./rp", None, "example.net", Some("rp")],
+                 valid_13: ["example.net.../rp", None, "example.net", Some("rp")],
+                 valid_14: ["[::1]", None, "[::1]", None],
+                 valid_15: ["\u{212B}@example.net", Some("\u{00e5}"), "example.net", None]);
+
+test_invalid_addrs!(invalid_00: "@example.net/test",
                    invalid_01: "lp@/rp",
                    invalid_02: r#"b"d@example.net"#,
                    invalid_03: r#"b&d@example.net"#,
@@ -90,9 +141,9 @@ test_invalid_addrs!(invalid_00: "test@/test",
                    invalid_06: r#"b<d@example.net"#,
                    invalid_07: r#"b>d@example.net"#,
                    invalid_08: r#"e@example.net/"#,
-                   invalid_09: format!("{:width$}@example.net", "e", width=1024),
-                   invalid_10: format!("example@{:width$}", "e", width=1024),
-                   invalid_11: format!("e@example.net/{:width$}", "e", width=1024),
+                   invalid_09: format!("{:e^width$}@example.net", "e", width=1024),
+                   invalid_10: format!("example@{:e^width$}", "e", width=1024),
+                   invalid_11: format!("e@example.net/{:e^width$}", "e", width=1024),
                    invalid_12: r#""#,
                    invalid_13: r#"[]"#,
                    invalid_14: r#"[1.1.1.1]"#,
