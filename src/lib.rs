@@ -328,7 +328,7 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
-    /// let j = Jid::new(Some("feste"), "example.net", None)?;
+    /// let j = Jid::new("feste", "example.net", None)?;
     /// assert_eq!(j, "feste@example.net");
     /// #     Ok(())
     /// # }
@@ -336,12 +336,12 @@ impl<'a> Jid<'a> {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn new(local: Option<&'a str>,
-               domain: &'a str,
-               resource: Option<&'a str>)
-               -> Result<Jid<'a>> {
+    pub fn new<L, R>(local: L, domain: &'a str, resource: R) -> Result<Jid<'a>>
+        where L: Into<Option<&'a str>>,
+              R: Into<Option<&'a str>>
+    {
         Ok(Jid {
-               local: match local {
+               local: match local.into() {
                    Some(l) => Jid::process_local(l)?,
                    None => "".into(),
                },
@@ -349,7 +349,7 @@ impl<'a> Jid<'a> {
                    Err(err) => return Err(err),
                    Ok(d) => d,
                },
-               resource: match resource {
+               resource: match resource.into() {
                    Some(r) => Jid::process_resource(r)?,
                    None => "".into(),
                },
@@ -535,19 +535,22 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("example.net")?;
-    /// assert_eq!(j.with_local(Some("feste"))?, "feste@example.net");
+    /// assert_eq!(j.with_local("feste")?, "feste@example.net");
     ///
     /// let j = Jid::from_str("iago@example.net")?;
     /// assert_eq!(j.with_local(None)?, "example.net");
+    ///
+    /// let j = Jid::from_str("feste@example.net")?;
+    /// assert!(j.with_local("").is_err());
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn with_local(self, local: Option<&'a str>) -> Result<Jid<'a>> {
+    pub fn with_local<T: Into<Option<&'a str>>>(self, local: T) -> Result<Jid<'a>> {
         Ok(Jid {
-               local: match local {
+               local: match local.into() {
                    Some(l) => Jid::process_local(l)?,
                    None => "".into(),
                },
@@ -608,21 +611,24 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Error;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
     /// let j = Jid::from_str("feste@example.net")?;
-    /// assert_eq!(j.with_resource(Some("1234"))?, "feste@example.net/1234");
+    /// assert_eq!(j.with_resource("1234")?, "feste@example.net/1234");
     ///
     /// let j = Jid::from_str("feste@example.net/1234")?;
     /// assert_eq!(j.with_resource(None)?, "feste@example.net");
+    ///
+    /// let j = Jid::from_str("feste@example.net")?;
+    /// assert!(j.with_resource("").is_err());
     /// #     Ok(())
     /// # }
     /// # fn main() {
     /// #   try_main().unwrap();
     /// # }
     /// ```
-    pub fn with_resource(self, resource: Option<&'a str>) -> Result<Jid<'a>> {
+    pub fn with_resource<T: Into<Option<&'a str>>>(self, resource: T) -> Result<Jid<'a>> {
         Ok(Jid {
                local: self.local,
                domain: self.domain,
-               resource: match resource {
+               resource: match resource.into() {
                    Some(r) => Jid::process_resource(r)?,
                    None => "".into(),
                },
