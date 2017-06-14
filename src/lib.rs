@@ -43,7 +43,7 @@
 //! ```rust
 //! # use xmpp_addr::Jid;
 //! # fn try_main() -> Result<(), xmpp_addr::Error> {
-//! let j = Jid::new(Some("feste"), "example.net", None)?;
+//! let j = Jid::new("feste", "example.net", None)?;
 //! assert_eq!(j, "feste@example.net");
 //! #     Ok(())
 //! # }
@@ -172,9 +172,9 @@ pub type Result<T> = result::Result<T, Error>;
 /// A parsed JID.
 #[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Jid<'a> {
-    local: borrow::Cow<'a, str>,
+    local: Option<borrow::Cow<'a, str>>,
     domain: borrow::Cow<'a, str>,
-    resource: borrow::Cow<'a, str>,
+    resource: Option<borrow::Cow<'a, str>>,
 }
 
 impl<'a> Jid<'a> {
@@ -342,16 +342,16 @@ impl<'a> Jid<'a> {
     {
         Ok(Jid {
                local: match local.into() {
-                   Some(l) => Jid::process_local(l)?,
-                   None => "".into(),
+                   None => None,
+                   Some(l) => Some(Jid::process_local(l)?),
                },
                domain: match Jid::process_domain(domain) {
                    Err(err) => return Err(err),
                    Ok(d) => d,
                },
                resource: match resource.into() {
-                   Some(r) => Jid::process_resource(r)?,
-                   None => "".into(),
+                   None => None,
+                   Some(r) => Some(Jid::process_resource(r)?),
                },
            })
     }
@@ -478,7 +478,7 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
-    /// let j = Jid::new(Some("feste"), "example.net", Some("res"))?;
+    /// let j = Jid::new("feste", "example.net", "res")?;
     /// assert_eq!(j.bare(), "feste@example.net");
     /// #     Ok(())
     /// # }
@@ -490,7 +490,7 @@ impl<'a> Jid<'a> {
         Jid {
             local: self.local,
             domain: self.domain,
-            resource: "".into(),
+            resource: None,
         }
     }
 
@@ -503,7 +503,7 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// # fn try_main() -> Result<(), xmpp_addr::Error> {
-    /// let j = Jid::new(Some("feste"), "example.net", Some("res"))?;
+    /// let j = Jid::new("feste", "example.net", "res")?;
     /// assert_eq!(j.domain(), "example.net");
     /// #     Ok(())
     /// # }
@@ -513,9 +513,9 @@ impl<'a> Jid<'a> {
     /// ```
     pub fn domain(self) -> Jid<'a> {
         Jid {
-            local: "".into(),
+            local: None,
             domain: self.domain,
-            resource: "".into(),
+            resource: None,
         }
     }
 
@@ -551,8 +551,8 @@ impl<'a> Jid<'a> {
     pub fn with_local<T: Into<Option<&'a str>>>(self, local: T) -> Result<Jid<'a>> {
         Ok(Jid {
                local: match local.into() {
-                   Some(l) => Jid::process_local(l)?,
-                   None => "".into(),
+                   Some(l) => Some(Jid::process_local(l)?),
+                   None => None,
                },
                domain: self.domain,
                resource: self.resource,
@@ -629,8 +629,8 @@ impl<'a> Jid<'a> {
                local: self.local,
                domain: self.domain,
                resource: match resource.into() {
-                   Some(r) => Jid::process_resource(r)?,
-                   None => "".into(),
+                   Some(r) => Some(Jid::process_resource(r)?),
+                   None => None,
                },
            })
     }
@@ -685,9 +685,9 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn localpart(&self) -> Option<&str> {
-        match self.local.len() {
-            0 => None,
-            _ => Some(&(self.local[..])),
+        match self.local {
+            None => None,
+            Some(ref l) => Some(&l[..]),
         }
     }
 
@@ -729,13 +729,17 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn resourcepart(&self) -> Option<&str> {
-        match self.resource.len() {
-            0 => None,
-            _ => Some(&(self.resource[..])),
+        match self.resource {
+            None => None,
+            Some(ref r) => Some(&r[..]),
         }
     }
 
     /// Constructs a JID from its constituent parts, bypassing safety checks.
+    /// A `None` value for the localpart or resourcepart indicates that there is no localpart or
+    /// resourcepart. A value of `Some("")` (although note that the `Some()` wrapper may be elided)
+    /// indicates that the localpart or resourcepart is empty, which is invalid, but allowed by
+    /// this unsafe function (eg. `@example.com`).
     ///
     /// # Examples
     ///
@@ -744,15 +748,27 @@ impl<'a> Jid<'a> {
     /// ```rust
     /// # use xmpp_addr::Jid;
     /// unsafe {
-    ///     let j = Jid::new_unchecked(r#"/o\"#, "[badip]", "");
+    ///     let j = Jid::new_unchecked(r#"/o\"#, "[badip]", None);
     ///     assert_eq!(j, r#"/o\@[badip]"#);
+    ///
+    ///     let j = Jid::new_unchecked("", "example.com", "");
+    ///     assert_eq!(j, "@example.com/");
     /// }
     /// ```
-    pub unsafe fn new_unchecked(local: &'a str, domain: &'a str, resource: &'a str) -> Jid<'a> {
+    pub unsafe fn new_unchecked<L, R>(local: L, domain: &'a str, resource: R) -> Jid<'a>
+        where L: Into<Option<&'a str>>,
+              R: Into<Option<&'a str>>
+    {
         Jid {
-            local: local.into(),
+            local: match local.into() {
+                None => None,
+                Some(s) => Some(s.into()),
+            },
             domain: domain.into(),
-            resource: resource.into(),
+            resource: match resource.into() {
+                None => None,
+                Some(s) => Some(s.into()),
+            },
         }
     }
 }
@@ -777,12 +793,14 @@ impl<'a> Jid<'a> {
 /// ```
 impl<'a> fmt::Display for Jid<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if !self.local.is_empty() {
-            write!(f, "{}@", self.local)?;
+        match self.local {
+            None => {}
+            Some(ref l) => write!(f, "{}@", l)?,
         }
         write!(f, "{}", self.domain)?;
-        if !self.resource.is_empty() {
-            write!(f, "/{}", self.resource)?;
+        match self.resource {
+            None => {}
+            Some(ref r) => write!(f, "/{}", r)?,
         }
         Ok(())
     }
@@ -1025,9 +1043,9 @@ impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
 impl<'a> convert::From<net::Ipv4Addr> for Jid<'a> {
     fn from(addr: net::Ipv4Addr) -> Jid<'a> {
         return Jid {
-                   local: "".into(),
+                   local: None,
                    domain: format!("{}", addr).into(),
-                   resource: "".into(),
+                   resource: None,
                };
     }
 }
@@ -1036,9 +1054,9 @@ impl<'a> convert::From<net::Ipv4Addr> for Jid<'a> {
 impl<'a> convert::From<net::Ipv6Addr> for Jid<'a> {
     fn from(addr: net::Ipv6Addr) -> Jid<'a> {
         return Jid {
-                   local: "".into(),
+                   local: None,
                    domain: format!("[{}]", addr).into(),
-                   resource: "".into(),
+                   resource: None,
                };
     }
 }
