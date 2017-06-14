@@ -27,6 +27,14 @@
 //! [RFC 7622]: https://tools.ietf.org/html/rfc7622
 //! [RFC 7564]: https://tools.ietf.org/html/rfc7564
 //!
+//! # Features
+//!
+//! The following feature flag can be used when compiling the crate:
+//!
+//! - `stable` — only build with stable APIs (no `TryFrom` impls)
+//!
+//! It is on by default. To use unstable features on a nightly version of rust, build and test
+//! with the `--no-default-features` flag.
 //!
 //! # Examples
 //!
@@ -111,10 +119,6 @@ extern crate unicode_normalization;
 
 use unicode_normalization::UnicodeNormalization;
 
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;
-
 use std::convert;
 
 use std::ascii::AsciiExt;
@@ -166,7 +170,6 @@ pub enum Error {
 pub type Result<T> = result::Result<T, Error>;
 
 /// A parsed JID.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Jid<'a> {
     local: borrow::Cow<'a, str>,
