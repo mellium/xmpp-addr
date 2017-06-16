@@ -166,7 +166,9 @@ pub enum Error {
     IDNA(idna::uts46::Errors),
 }
 
-/// A custom result type for JIDs that elides the Error type.
+/// A custom result type for JIDs that elides the error type.
+///
+/// [error type]: ./enum.Error.html
 pub type Result<T> = result::Result<T, Error>;
 
 /// A parsed JID.
@@ -248,9 +250,9 @@ impl<'a> Jid<'a> {
 
         let mut chars = s.char_indices();
         let sep = chars.find(|&c| match c {
-                                 (_, '@') | (_, '/') => true,
-                                 _ => false,
-                             });
+            (_, '@') | (_, '/') => true,
+            _ => false,
+        });
 
         let (lpart, dpart, rpart) = match sep {
             // If there are no part separators at all, the entire string is a domainpart.
@@ -271,9 +273,9 @@ impl<'a> Jid<'a> {
             Some((i, '@')) => {
                 // Continue looking for a '/'.
                 let slash = chars.find(|&c| match c {
-                                           (_, '/') => true,
-                                           _ => false,
-                                       });
+                    (_, '/') => true,
+                    _ => false,
+                });
 
                 // RFC 7622 §3.3.1 provides a small table of characters which are still not allowed in
                 // localpart's even though the IdentifierClass base class and the UsernameCaseMapped
@@ -337,23 +339,24 @@ impl<'a> Jid<'a> {
     /// # }
     /// ```
     pub fn new<L, R>(local: L, domain: &'a str, resource: R) -> Result<Jid<'a>>
-        where L: Into<Option<&'a str>>,
-              R: Into<Option<&'a str>>
+    where
+        L: Into<Option<&'a str>>,
+        R: Into<Option<&'a str>>,
     {
         Ok(Jid {
-               local: match local.into() {
-                   None => None,
-                   Some(l) => Some(Jid::process_local(l)?),
-               },
-               domain: match Jid::process_domain(domain) {
-                   Err(err) => return Err(err),
-                   Ok(d) => d,
-               },
-               resource: match resource.into() {
-                   None => None,
-                   Some(r) => Some(Jid::process_resource(r)?),
-               },
-           })
+            local: match local.into() {
+                None => None,
+                Some(l) => Some(Jid::process_local(l)?),
+            },
+            domain: match Jid::process_domain(domain) {
+                Err(err) => return Err(err),
+                Ok(d) => d,
+            },
+            resource: match resource.into() {
+                None => None,
+                Some(r) => Some(Jid::process_resource(r)?),
+            },
+        })
     }
 
     fn process_local(local: &'a str) -> Result<borrow::Cow<'a, str>> {
@@ -550,13 +553,13 @@ impl<'a> Jid<'a> {
     /// ```
     pub fn with_local<T: Into<Option<&'a str>>>(self, local: T) -> Result<Jid<'a>> {
         Ok(Jid {
-               local: match local.into() {
-                   Some(l) => Some(Jid::process_local(l)?),
-                   None => None,
-               },
-               domain: self.domain,
-               resource: self.resource,
-           })
+            local: match local.into() {
+                Some(l) => Some(Jid::process_local(l)?),
+                None => None,
+            },
+            domain: self.domain,
+            resource: self.resource,
+        })
     }
 
     /// Consumes a JID to construct a new JID with the given domainpart.
@@ -585,13 +588,13 @@ impl<'a> Jid<'a> {
     /// ```
     pub fn with_domain(self, domain: &'a str) -> Result<Jid<'a>> {
         Ok(Jid {
-               local: self.local,
-               domain: match Jid::process_domain(domain) {
-                   Err(err) => return Err(err),
-                   Ok(d) => d,
-               },
-               resource: self.resource,
-           })
+            local: self.local,
+            domain: match Jid::process_domain(domain) {
+                Err(err) => return Err(err),
+                Ok(d) => d,
+            },
+            resource: self.resource,
+        })
     }
 
     /// Consumes a JID to construct a new JID with the given resourcepart.
@@ -626,13 +629,13 @@ impl<'a> Jid<'a> {
     /// ```
     pub fn with_resource<T: Into<Option<&'a str>>>(self, resource: T) -> Result<Jid<'a>> {
         Ok(Jid {
-               local: self.local,
-               domain: self.domain,
-               resource: match resource.into() {
-                   Some(r) => Some(Jid::process_resource(r)?),
-                   None => None,
-               },
-           })
+            local: self.local,
+            domain: self.domain,
+            resource: match resource.into() {
+                Some(r) => Some(Jid::process_resource(r)?),
+                None => None,
+            },
+        })
     }
 
     /// Parse a string to create a Jid.
@@ -756,8 +759,9 @@ impl<'a> Jid<'a> {
     /// }
     /// ```
     pub unsafe fn new_unchecked<L, R>(local: L, domain: &'a str, resource: R) -> Jid<'a>
-        where L: Into<Option<&'a str>>,
-              R: Into<Option<&'a str>>
+    where
+        L: Into<Option<&'a str>>,
+        R: Into<Option<&'a str>>,
     {
         Jid {
             local: match local.into() {
@@ -999,8 +1003,9 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
 impl<'a> convert::TryFrom<(Option<&'a str>, &'a str, Option<&'a str>)> for Jid<'a> {
     type Error = Error;
 
-    fn try_from(parts: (Option<&'a str>, &'a str, Option<&'a str>))
-                -> result::Result<Self, Self::Error> {
+    fn try_from(
+        parts: (Option<&'a str>, &'a str, Option<&'a str>),
+    ) -> result::Result<Self, Self::Error> {
         Jid::new(parts.0, parts.1, parts.2)
     }
 }
@@ -1043,10 +1048,10 @@ impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
 impl<'a> convert::From<net::Ipv4Addr> for Jid<'a> {
     fn from(addr: net::Ipv4Addr) -> Jid<'a> {
         return Jid {
-                   local: None,
-                   domain: format!("{}", addr).into(),
-                   resource: None,
-               };
+            local: None,
+            domain: format!("{}", addr).into(),
+            resource: None,
+        };
     }
 }
 
@@ -1054,10 +1059,10 @@ impl<'a> convert::From<net::Ipv4Addr> for Jid<'a> {
 impl<'a> convert::From<net::Ipv6Addr> for Jid<'a> {
     fn from(addr: net::Ipv6Addr) -> Jid<'a> {
         return Jid {
-                   local: None,
-                   domain: format!("[{}]", addr).into(),
-                   resource: None,
-               };
+            local: None,
+            domain: format!("[{}]", addr).into(),
+            resource: None,
+        };
     }
 }
 
