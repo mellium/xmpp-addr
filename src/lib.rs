@@ -257,14 +257,9 @@ impl<'a> Jid<'a> {
         let (lpart, dpart, rpart) = match sep {
             // If there are no part separators at all, the entire string is a domainpart.
             None => (None, s, None),
-            // The resource part exists (there's a '/') but it's empty (the first '/' is the last
-            // character).
-            Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
             // There is a resource part, and we did not find a localpart (the first separator found
             // was the first '/').
             Some((i, '/')) => (None, &s[0..i], Some(&s[i + 1..])),
-            // The JID starts with the '@' sign
-            Some((i, '@')) if i == 0 => return Err(Error::EmptyLocal),
             // The JID ends with the '@' sign
             Some((i, '@')) if i + 1 == s.len() => return Err(Error::ShortDomain),
             // We found a local part, so keep searching to try and find a resource part.
@@ -287,8 +282,6 @@ impl<'a> Jid<'a> {
                     // There is a '/', but it's immediately after the '@' (or there is a short
                     // domain part between them).
                     Some((j, _)) if j - i < 3 => return Err(Error::ShortDomain),
-                    // The resource part exists (there's a '/') but it's empty.
-                    Some((j, _)) if s.len() == j + 1 => return Err(Error::EmptyResource),
                     // This is a full JID.
                     Some((j, _)) => (Some(&s[0..i]), &s[i + 1..j], Some(&s[j + 1..])),
                 }
