@@ -166,7 +166,7 @@ pub enum Error {
     IDNA(idna::uts46::Errors),
 }
 
-/// A custom result type for JIDs that elides the error type.
+/// A custom result type for JIDs that elides the [error type].
 ///
 /// [error type]: ./enum.Error.html
 pub type Result<T> = result::Result<T, Error>;
