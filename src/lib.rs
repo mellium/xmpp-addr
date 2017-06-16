@@ -743,7 +743,12 @@ impl<'a> Jid<'a> {
     /// # use xmpp_addr::Jid;
     /// unsafe {
     ///     let j = Jid::new_unchecked(r#"/o\"#, "[badip]", None);
-    ///     assert_eq!(j, r#"/o\@[badip]"#);
+    ///     assert_eq!(j.localpart(), Some(r#"/o\"#));
+    ///     assert_eq!(j.domainpart(), "[badip]");
+    ///     assert_eq!(j.resourcepart(), None);
+    ///
+    ///     // Note that comparisons you would expect to work may fail when creating unsafe JIDs.
+    ///     assert_ne!(j, r#"/o\@[badip]"#);
     ///
     ///     let j = Jid::new_unchecked("", "example.com", "");
     ///     assert_eq!(j, "@example.com/");
@@ -1091,7 +1096,31 @@ impl<'a> convert::From<net::IpAddr> for Jid<'a> {
 /// ```
 impl<'a> cmp::PartialEq<str> for Jid<'a> {
     fn eq(&self, other: &str) -> bool {
-        if self.to_string() == other {
+        if match Jid::split(other) {
+            Err(_) => false,
+            Ok(p) => {
+                let local_match = match p.0 {
+                    None => self.local.is_none(),
+                    Some(s) => {
+                        match (&self).local {
+                            None => false,
+                            Some(ref l) => s == l,
+                        }
+                    }
+                };
+                let res_match = match p.2 {
+                    None => self.resource.is_none(),
+                    Some(s) => {
+                        match (&self).resource {
+                            None => false,
+                            Some(ref r) => s == r,
+                        }
+                    }
+                };
+                local_match && p.1 == self.domain && res_match
+            }
+        }
+        {
             return true;
         }
         match Jid::from_str(other) {
