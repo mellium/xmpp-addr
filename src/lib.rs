@@ -257,8 +257,6 @@ impl<'a> Jid<'a> {
         let (lpart, dpart, rpart) = match sep {
             // If there are no part separators at all, the entire string is a domainpart.
             None => (None, s, None),
-            // A '/' exists, but the domain part is too long.
-            Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
             // The resource part exists (there's a '/') but it's empty (the first '/' is the last
             // character).
             Some((i, '/')) if s.len() == i + 1 => return Err(Error::EmptyResource),
