@@ -1,7 +1,7 @@
 [package]
 name = "xmpp-addr"
 # Remember to bump html_root_url in src/lib.rs as well.
-version = "0.11.0"
+version = "0.11.1"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "MIT/Apache-2.0"
 description = """
