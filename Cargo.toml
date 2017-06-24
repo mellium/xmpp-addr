@@ -18,10 +18,10 @@ exclude = [
 ]
 
 [features]
-default = ["stable"]
+default = []
 
-# Use only stable APIs (eg. don't build with TryFrom)
-stable = []
+try_from = []
+ascii_ctype = []
 
 [dependencies]
 idna = "0.1"

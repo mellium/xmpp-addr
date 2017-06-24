@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg_attr(not(feature = "stable"), feature(try_from))]
+#![cfg_attr(feature = "try_from", feature(try_from))]
 
 extern crate xmpp_addr;
 use xmpp_addr::{Jid, Error};
 
 
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 use std::convert::TryFrom;
 
 use std::net::{Ipv6Addr, Ipv4Addr, IpAddr};
@@ -66,9 +66,9 @@ macro_rules! test_valid_addrs {
                 let dp = $domain;
                 let rp: Option<&str> = $res;
 
-                #[cfg(not(feature = "stable"))]
+                #[cfg(feature = "try_from")]
                 let jid = Jid::try_from(j).expect("Error parsing JID");
-                #[cfg(feature = "stable")]
+                #[cfg(not(feature = "try_from"))]
                 let jid = Jid::from_str(j).expect("Error parsing JID");
 
                 assert_eq!(lp, jid.localpart());
@@ -85,9 +85,9 @@ macro_rules! test_invalid_addrs {
             #[test]
             fn $num() {
                 let j = $jid;
-                #[cfg(not(feature = "stable"))]
+                #[cfg(feature = "try_from")]
                 let jid = Jid::try_from(j.as_ref());
-                #[cfg(feature = "stable")]
+                #[cfg(not(feature = "try_from"))]
                 let jid = Jid::from_str(j.as_ref());
                 match jid {
                     Err(_) => {}

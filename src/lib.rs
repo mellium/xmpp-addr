@@ -31,10 +31,13 @@
 //!
 //! The following feature flag can be used when compiling the crate:
 //!
-//! - `stable` — only build with stable APIs (no `TryFrom` impls)
+//! - `try_from` — build with experimental [`TryFrom`] impls on nightly
+//! - `ascii_ctype` — use experimental [ASCII APIs] instead of our own implementations
 //!
-//! It is on by default. To use unstable features on a nightly version of rust, build and test
-//! with the `--no-default-features` flag.
+//! [`TryFrom`]: https://doc.rust-lang.org/std/convert/trait.TryFrom.html
+//! [ASCII APIs]: https://github.com/rust-lang/rust/issues/39658
+//!
+//! No features are enabled by default.
 //!
 //! # Examples
 //!
@@ -54,8 +57,8 @@
 //!
 //! ## From parts (nightly)
 //!
-#![cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#![cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#![cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#![cfg_attr(feature = "try_from", doc = " ```rust")]
 //! #![feature(try_from)]
 //! # use std::convert::{ TryInto, TryFrom };
 //! # use xmpp_addr::Jid;
@@ -90,8 +93,8 @@
 //!
 //! ## Parsing (nightly)
 //!
-#![cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#![cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#![cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#![cfg_attr(feature = "try_from", doc = " ```rust")]
 //! #![feature(try_from)]
 //! # use std::convert::{ TryInto, TryFrom };
 //! # use xmpp_addr::Jid;
@@ -109,8 +112,8 @@
 //! ```
 
 #![deny(missing_docs)]
-#![cfg_attr(not(feature = "stable"), feature(try_from))]
-#![cfg_attr(not(feature = "stable"), feature(ascii_ctype))]
+#![cfg_attr(feature = "try_from", feature(try_from))]
+#![cfg_attr(feature = "ascii_ctype", feature(ascii_ctype))]
 
 #![doc(html_root_url = "https://docs.rs/xmpp-addr/0.11.1")]
 
@@ -356,9 +359,9 @@ impl<'a> Jid<'a> {
             // ASCII fast path
             // TODO: JIDs aren't likely to have long localparts; are multiple scans worth it just
             // to maybe avoid an allocation? Probably not.
-            #[cfg(not(feature = "stable"))]
+            #[cfg(feature = "ascii_ctype")]
             let is_lower = local.is_ascii_lowercase();
-            #[cfg(feature = "stable")]
+            #[cfg(not(feature = "ascii_ctype"))]
             let is_lower = local.bytes().find(|&c| b'A' <= c && c <= b'Z').is_none();
 
             if is_lower {
@@ -817,8 +820,8 @@ impl<'a> fmt::Display for Jid<'a> {
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#[cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#[cfg_attr(feature = "try_from", doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_addr::{Jid, Result};
@@ -834,7 +837,7 @@ impl<'a> fmt::Display for Jid<'a> {
 /// #   try_main().unwrap();
 /// # }
 /// ```
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
     type Error = Error;
 
@@ -854,8 +857,8 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#[cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#[cfg_attr(feature = "try_from", doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_addr::{Jid, Result};
@@ -874,7 +877,7 @@ impl<'a> convert::TryFrom<(&'a str, &'a str)> for Jid<'a> {
 /// #   try_main().unwrap();
 /// # }
 /// ```
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 impl<'a> convert::TryFrom<(Option<&'a str>, &'a str)> for Jid<'a> {
     type Error = Error;
 
@@ -896,8 +899,8 @@ impl<'a> convert::TryFrom<(Option<&'a str>, &'a str)> for Jid<'a> {
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#[cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#[cfg_attr(feature = "try_from", doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_addr::{Jid, Result};
@@ -916,7 +919,7 @@ impl<'a> convert::TryFrom<(Option<&'a str>, &'a str)> for Jid<'a> {
 /// #   try_main().unwrap();
 /// # }
 /// ```
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 impl<'a> convert::TryFrom<(&'a str, Option<&'a str>)> for Jid<'a> {
     type Error = Error;
 
@@ -937,8 +940,8 @@ impl<'a> convert::TryFrom<(&'a str, Option<&'a str>)> for Jid<'a> {
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#[cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#[cfg_attr(feature = "try_from", doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_addr::{Jid, Result};
@@ -954,7 +957,7 @@ impl<'a> convert::TryFrom<(&'a str, Option<&'a str>)> for Jid<'a> {
 /// #   try_main().unwrap();
 /// # }
 /// ```
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
     type Error = Error;
 
@@ -975,8 +978,8 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#[cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#[cfg_attr(feature = "try_from", doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_addr::{Jid, Result};
@@ -995,7 +998,7 @@ impl<'a> convert::TryFrom<(&'a str, &'a str, &'a str)> for Jid<'a> {
 /// #   try_main().unwrap();
 /// # }
 /// ```
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 impl<'a> convert::TryFrom<(Option<&'a str>, &'a str, Option<&'a str>)> for Jid<'a> {
     type Error = Error;
 
@@ -1017,8 +1020,8 @@ impl<'a> convert::TryFrom<(Option<&'a str>, &'a str, Option<&'a str>)> for Jid<'
 ///
 /// # Examples
 ///
-#[cfg_attr(feature = "stable", doc = " ```rust,ignore")]
-#[cfg_attr(not(feature = "stable"), doc = " ```rust")]
+#[cfg_attr(not(feature = "try_from"), doc = " ```rust,ignore")]
+#[cfg_attr(feature = "try_from", doc = " ```rust")]
 /// #![feature(try_from)]
 /// # use std::convert::TryInto;
 /// # use xmpp_addr::Jid;
@@ -1031,7 +1034,7 @@ impl<'a> convert::TryFrom<(Option<&'a str>, &'a str, Option<&'a str>)> for Jid<'
 /// #   try_main().unwrap();
 /// # }
 /// ```
-#[cfg(not(feature = "stable"))]
+#[cfg(feature = "try_from")]
 impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
     type Error = Error;
 
