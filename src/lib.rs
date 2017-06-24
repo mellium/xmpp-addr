@@ -1074,12 +1074,17 @@ impl<'a> convert::From<net::IpAddr> for Jid<'a> {
 
 /// Allows JIDs to be compared with strings.
 ///
-/// **This is expensive**. The JID is first converted into its canonical string representation and
-/// compared for bit-string identity with the provided string (byte-wise compare). If the string
-/// does not match, it is then canonicalized itself (by converting it into a JID) and compared
-/// again. If constructing a JID from the string fails, the comparison always fails (even if the
-/// original JID is would match the invalid output). Unsafe comparisons should convert the JID to a
-/// string and compare strings themselves.
+/// **This may be expensive**. The string is first split using [`Jid::split`] and each part is
+/// compared with its corresponding part in the JID. If this comparison is successful, true is
+/// returned and the comparison is cheap. If this does not match, however, the string is then
+/// canonicalized (by converting it into a JID) and the parts are compared again; this may require
+/// expensive heap allocations. If constructing a JID from the string fails, the comparison always
+/// fails (even if the original JID is would match the invalid output). Comparisons involving
+/// unsafe JIDs constructed with [`Jid::new_unchecked`] should construct an unsafe JID from the
+/// string and manually compare the parts.
+///
+/// [`Jid::split`]: struct.Jid.html#method.split
+/// [`Jid::new_unchecked`]: struct.Jid.html#method.new_unchecked
 ///
 /// # Examples
 ///
@@ -1132,12 +1137,17 @@ impl<'a> cmp::PartialEq<str> for Jid<'a> {
 
 /// Allows JIDs to be compared with strings.
 ///
-/// **This is expensive**. The JID is first converted into its canonical string representation and
-/// compared for bit-string identity with the provided string (byte-wise compare). If the string
-/// does not match, it is then canonicalized itself (by converting it into a JID) and compared
-/// again. If constructing a JID from the string fails, the comparison always fails (even if the
-/// original JID is would match the invalid output). Unsafe comparisons should convert the JID to a
-/// string and compare strings themselves.
+/// **This may be expensive**. The string is first split using [`Jid::split`] and each part is
+/// compared with its corresponding part in the JID. If this comparison is successful, true is
+/// returned and the comparison is cheap. If this does not match, however, the string is then
+/// canonicalized (by converting it into a JID) and the parts are compared again; this may require
+/// expensive heap allocations. If constructing a JID from the string fails, the comparison always
+/// fails (even if the original JID is would match the invalid output). Comparisons involving
+/// unsafe JIDs constructed with [`Jid::new_unchecked`] should construct an unsafe JID from the
+/// string and manually compare the parts.
+///
+/// [`Jid::split`]: struct.Jid.html#method.split
+/// [`Jid::new_unchecked`]: struct.Jid.html#method.new_unchecked
 ///
 /// # Examples
 ///
@@ -1164,12 +1174,18 @@ macro_rules! impl_eq {
 
         /// Allows JIDs to be compared with strings.
         ///
-        /// **This is expensive**. The JID is first converted into its canonical string
-        /// representation and compared for bit-string identity with the provided string (byte-wise
-        /// compare). If the string does not match, it is then canonicalized itself (by converting
-        /// it into a JID) and compared again. If constructing a JID from the string fails, the
-        /// comparison always fails (even if the original JID is would match the invalid output).
-        /// Unsafe comparisons should convert the JID to a string and compare strings themselves.
+        /// **This may be expensive**. The string is first split using [`Jid::split`] and each part
+        /// is compared with its corresponding part in the JID. If this comparison is successful,
+        /// true is returned and the comparison is cheap. If this does not match, however, the
+        /// string is then canonicalized (by converting it into a JID) and the parts are compared
+        /// again; this may require expensive heap allocations. If constructing a JID from the
+        /// string fails, the comparison always fails (even if the original JID is would match the
+        /// invalid output). Comparisons involving unsafe JIDs constructed with
+        /// [`Jid::new_unchecked`] should construct an unsafe JID from the string and manually
+        /// compare the parts.
+        ///
+        /// [`Jid::split`]: struct.Jid.html#method.split
+        /// [`Jid::new_unchecked`]: struct.Jid.html#method.new_unchecked
         impl<'a, 'b> PartialEq<$lhs> for $rhs {
             #[inline]
             fn eq(&self, other: &$lhs) -> bool { PartialEq::eq(self, &other[..]) }
@@ -1177,12 +1193,18 @@ macro_rules! impl_eq {
 
         /// Allows JIDs to be compared with strings.
         ///
-        /// **This is expensive**. The JID is first converted into its canonical string
-        /// representation and compared for bit-string identity with the provided string (byte-wise
-        /// compare). If the string does not match, it is then canonicalized itself (by converting
-        /// it into a JID) and compared again. If constructing a JID from the string fails, the
-        /// comparison always fails (even if the original JID is would match the invalid output).
-        /// Unsafe comparisons should convert the JID to a string and compare strings themselves.
+        /// **This may be expensive**. The string is first split using [`Jid::split`] and each part
+        /// is compared with its corresponding part in the JID. If this comparison is successful,
+        /// true is returned and the comparison is cheap. If this does not match, however, the
+        /// string is then canonicalized (by converting it into a JID) and the parts are compared
+        /// again; this may require expensive heap allocations. If constructing a JID from the
+        /// string fails, the comparison always fails (even if the original JID is would match the
+        /// invalid output). Comparisons involving unsafe JIDs constructed with
+        /// [`Jid::new_unchecked`] should construct an unsafe JID from the string and manually
+        /// compare the parts.
+        ///
+        /// [`Jid::split`]: struct.Jid.html#method.split
+        /// [`Jid::new_unchecked`]: struct.Jid.html#method.new_unchecked
         impl<'a, 'b> PartialEq<$rhs> for $lhs {
             #[inline]
             fn eq(&self, other: &$rhs) -> bool { PartialEq::eq(&self[..], other) }
