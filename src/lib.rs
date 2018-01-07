@@ -122,11 +122,10 @@ extern crate unicode_normalization;
 
 use unicode_normalization::UnicodeNormalization;
 
-use std::convert;
-
 use std::ascii::AsciiExt;
 use std::borrow;
 use std::cmp;
+use std::convert;
 use std::fmt;
 use std::net;
 use std::result;
