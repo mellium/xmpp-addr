@@ -22,10 +22,10 @@
 //! internationalization.
 //!
 //! **Note well** that this package currently isn't fully compliant with [RFC 7622]; it does not
-//! perform the PRECIS ([RFC 7564]) enforcement step.
+//! perform the PRECIS ([RFC 8264]) enforcement step.
 //!
 //! [RFC 7622]: https://tools.ietf.org/html/rfc7622
-//! [RFC 7564]: https://tools.ietf.org/html/rfc7564
+//! [RFC 8264]: https://tools.ietf.org/html/rfc8264
 //!
 //! # Features
 //!
