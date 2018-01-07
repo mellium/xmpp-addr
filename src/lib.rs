@@ -114,7 +114,6 @@
 #![deny(missing_docs)]
 #![cfg_attr(feature = "try_from", feature(try_from))]
 #![cfg_attr(feature = "ascii_ctype", feature(ascii_ctype))]
-
 #![doc(html_root_url = "https://docs.rs/xmpp-addr/0.11.1")]
 
 extern crate idna;
@@ -1108,26 +1107,21 @@ impl<'a> cmp::PartialEq<str> for Jid<'a> {
             Ok(p) => {
                 let local_match = match p.0 {
                     None => self.local.is_none(),
-                    Some(s) => {
-                        match (&self).local {
-                            None => false,
-                            Some(ref l) => s == l,
-                        }
-                    }
+                    Some(s) => match (&self).local {
+                        None => false,
+                        Some(ref l) => s == l,
+                    },
                 };
                 let res_match = match p.2 {
                     None => self.resource.is_none(),
-                    Some(s) => {
-                        match (&self).resource {
-                            None => false,
-                            Some(ref r) => s == r,
-                        }
-                    }
+                    Some(s) => match (&self).resource {
+                        None => false,
+                        Some(ref r) => s == r,
+                    },
                 };
                 local_match && p.1 == self.domain && res_match
             }
-        }
-        {
+        } {
             return true;
         }
         match Jid::from_str(other) {
