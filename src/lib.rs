@@ -114,7 +114,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(feature = "try_from", feature(try_from))]
 #![cfg_attr(feature = "ascii_ctype", feature(ascii_ctype))]
-#![doc(html_root_url = "https://docs.rs/xmpp-addr/0.11.1")]
+#![doc(html_root_url = "https://docs.rs/xmpp-addr/0.12.0")]
 
 extern crate idna;
 extern crate unicode_normalization;
