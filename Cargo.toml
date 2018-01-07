@@ -24,5 +24,5 @@ try_from = []
 ascii_ctype = []
 
 [dependencies]
-idna = "0.1"
-unicode-normalization = "0.1"
+idna = "0.1.4"
+unicode-normalization = "0.1.5"

@@ -9,13 +9,12 @@
 #![cfg_attr(feature = "try_from", feature(try_from))]
 
 extern crate xmpp_addr;
-use xmpp_addr::{Jid, Error};
-
+use xmpp_addr::{Error, Jid};
 
 #[cfg(feature = "try_from")]
 use std::convert::TryFrom;
 
-use std::net::{Ipv6Addr, Ipv4Addr, IpAddr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 macro_rules! test_valid_split {
     ( $( $num:ident: [ $jid:expr, $local:expr, $domain:expr, $res:expr ] ),+ ) => {
@@ -130,7 +129,8 @@ test_valid_addrs!(valid_00: ["example.net", None, "example.net", None],
                  valid_12: ["example.net./rp", None, "example.net", Some("rp")],
                  valid_13: ["example.net.../rp", None, "example.net", Some("rp")],
                  valid_14: ["[::1]", None, "[::1]", None],
-                 valid_15: ["\u{212B}@example.net", Some("\u{00e5}"), "example.net", None]);
+                 valid_15: ["\u{212B}@example.net", Some("\u{00e5}"), "example.net", None],
+                 valid_16: ["[", None, "[", None]);
 
 test_invalid_addrs!(invalid_00: "@example.net/test",
                    invalid_01: "lp@/rp",
@@ -153,8 +153,7 @@ test_invalid_addrs!(invalid_00: "@example.net/test",
                    invalid_18: r#"/rp"#,
                    invalid_19: r#"@/"#,
                    invalid_20: r#"/"#,
-                   invalid_21: r#"@"#,
-                   invalid_22: r#"["#);
+                   invalid_21: r#"@"#);
 
 #[test]
 fn test_display() {
