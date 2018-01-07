@@ -121,6 +121,7 @@ extern crate unicode_normalization;
 
 use unicode_normalization::UnicodeNormalization;
 
+#[cfg(feature = "ascii_ctype")]
 use std::ascii::AsciiExt;
 use std::borrow;
 use std::cmp;
