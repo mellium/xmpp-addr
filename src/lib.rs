@@ -8,10 +8,10 @@
 
 //! Implements the XMPP Address Format as defined in RFC 7622.
 //!
-//! For historical reasons, XMPP addresses are called "Jabber Identifiers", or JIDs. JIDs are
-//! comprised of three parts: the localpart (a username or account), the domainpart (the server),
-//! and the resourcepart (a specific client) and look more or less like an email where the first
-//! two parts are demarcated by the '@' character but with the
+//! For historical reasons, XMPP addresses are called "Jabber Identifiers", or JIDs.
+//! JIDs are comprised of three parts: an optional localpart (a username or account), the
+//! domainpart (the server), and an optional resourcepart (a specific client) and look more or less
+//! like an email where the first two parts are demarcated by the '@' character but with the
 //! resourcepart added to the end and demarcated by the '/' character, eg:
 //!
 //! > localpart@domainpart/resourcepart
