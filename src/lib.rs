@@ -32,7 +32,6 @@
 //! The following feature flag can be used when compiling the crate:
 //!
 //! - `try_from` — build with experimental [`TryFrom`] impls on nightly
-//! - `ascii_ctype` — use experimental [ASCII APIs] instead of our own implementations
 //!
 //! [`TryFrom`]: https://doc.rust-lang.org/std/convert/trait.TryFrom.html
 //! [ASCII APIs]: https://github.com/rust-lang/rust/issues/39658
@@ -113,7 +112,6 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(feature = "try_from", feature(try_from))]
-#![cfg_attr(feature = "ascii_ctype", feature(ascii_ctype))]
 #![doc(html_root_url = "https://docs.rs/xmpp-addr/0.12.0")]
 
 extern crate idna;
@@ -121,8 +119,6 @@ extern crate unicode_normalization;
 
 use unicode_normalization::UnicodeNormalization;
 
-#[cfg(feature = "ascii_ctype")]
-use std::ascii::AsciiExt;
 use std::borrow;
 use std::cmp;
 use std::convert;
@@ -352,18 +348,13 @@ impl<'a> Jid<'a> {
         })
     }
 
+    // TODO: This should all be handled by the PRECIS UsernameCaseMapped profile.
     fn process_local(local: &'a str) -> Result<borrow::Cow<'a, str>> {
-        // TODO: This should all be handled by the PRECIS UsernameCaseMapped profile.
         let local: borrow::Cow<'a, str> = if local.is_ascii() {
             // ASCII fast path
             // TODO: JIDs aren't likely to have long localparts; are multiple scans worth it just
-            // to maybe avoid an allocation? Probably not.
-            #[cfg(feature = "ascii_ctype")]
-            let is_lower = local.is_ascii_lowercase();
-            #[cfg(not(feature = "ascii_ctype"))]
-            let is_lower = local.bytes().find(|&c| b'A' <= c && c <= b'Z').is_none();
-
-            if is_lower {
+            // to maybe avoid an allocation?
+            if local.bytes().all(|c| c.is_ascii_lowercase()) {
                 local.into()
             } else {
                 local.to_ascii_lowercase().into()
