@@ -967,22 +967,22 @@ impl<'a> convert::TryFrom<&'a str> for Jid<'a> {
 /// Creates a JID from an IPv4 address.
 impl<'a> convert::From<net::Ipv4Addr> for Jid<'a> {
     fn from(addr: net::Ipv4Addr) -> Jid<'a> {
-        return Jid {
+        Jid {
             local: None,
             domain: format!("{}", addr).into(),
             resource: None,
-        };
+        }
     }
 }
 
 /// Creates a JID from an IPv6 address.
 impl<'a> convert::From<net::Ipv6Addr> for Jid<'a> {
     fn from(addr: net::Ipv6Addr) -> Jid<'a> {
-        return Jid {
+        Jid {
             local: None,
             domain: format!("[{}]", addr).into(),
             resource: None,
-        };
+        }
     }
 }
 
