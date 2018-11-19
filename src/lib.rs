@@ -1027,14 +1027,14 @@ impl<'a> cmp::PartialEq<str> for Jid<'a> {
             Ok(p) => {
                 let local_match = match p.0 {
                     None => self.local.is_none(),
-                    Some(s) => match (&self).local {
+                    Some(s) => match self.local {
                         None => false,
                         Some(ref l) => s == l,
                     },
                 };
                 let res_match = match p.2 {
                     None => self.resource.is_none(),
-                    Some(s) => match (&self).resource {
+                    Some(s) => match self.resource {
                         None => false,
                         Some(ref r) => s == r,
                     },
