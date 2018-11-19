@@ -355,7 +355,7 @@ impl<'a> Jid<'a> {
     fn process_domain(domain: &'a str) -> Result<borrow::Cow<'a, str>> {
         let is_v6 = if domain.starts_with('[') && domain.ends_with(']') {
             // This should be an IPv6 address, validate it.
-            let inner = unsafe { domain.slice_unchecked(1, domain.len() - 1) };
+            let inner = unsafe { domain.get_unchecked(1..domain.len() - 1) };
             match net::Ipv6Addr::from_str(inner) {
                 Ok(_) => true,
                 Err(v) => return Err(Error::Addr(v)),
