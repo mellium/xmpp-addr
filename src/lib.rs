@@ -102,9 +102,6 @@
 #![cfg_attr(feature = "try_from", feature(try_from))]
 #![doc(html_root_url = "https://docs.rs/xmpp-addr/0.13.0")]
 
-extern crate idna;
-extern crate unicode_normalization;
-
 use unicode_normalization::UnicodeNormalization;
 
 use std::borrow;
@@ -733,7 +730,7 @@ impl<'a> Jid<'a> {
 /// #     Ok(())
 /// # }
 /// ```
-impl<'a> fmt::Display for Jid<'a> {
+impl fmt::Display for Jid<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.local {
             None => {}
@@ -1020,7 +1017,7 @@ impl<'a> convert::From<net::IpAddr> for Jid<'a> {
 /// #     Ok(())
 /// # }
 /// ```
-impl<'a> cmp::PartialEq<str> for Jid<'a> {
+impl cmp::PartialEq<str> for Jid<'_> {
     fn eq(&self, other: &str) -> bool {
         if match Jid::split(other) {
             Err(_) => false,
@@ -1075,8 +1072,8 @@ impl<'a> cmp::PartialEq<str> for Jid<'a> {
 /// #     Ok(())
 /// # }
 /// ```
-impl<'a> cmp::PartialEq<Jid<'a>> for str {
-    fn eq(&self, other: &Jid<'a>) -> bool {
+impl cmp::PartialEq<Jid<'_>> for str {
+    fn eq(&self, other: &Jid<'_>) -> bool {
         PartialEq::eq(other, self)
     }
 }

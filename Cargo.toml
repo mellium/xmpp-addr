@@ -2,6 +2,7 @@
 name = "xmpp-addr"
 # Remember to bump html_root_url in src/lib.rs as well.
 version = "0.13.0"
+edition="2018"
 authors = ["Sam Whited <sam@samwhited.com>"]
 license = "MIT/Apache-2.0"
 description = """
