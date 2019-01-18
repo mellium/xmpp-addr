@@ -34,7 +34,6 @@
 //! - `try_from` — build with experimental [`TryFrom`] impls on nightly
 //!
 //! [`TryFrom`]: https://doc.rust-lang.org/std/convert/trait.TryFrom.html
-//! [ASCII APIs]: https://github.com/rust-lang/rust/issues/39658
 //!
 //! No features are enabled by default.
 //!
@@ -278,7 +277,7 @@ impl<'a> Jid<'a> {
         //    constructing an XMPP URI or IRI [RFC5122].  In particular, such a
         //    character MUST be stripped before any other canonicalization steps
         //    are taken.
-        Ok((lpart, dpart.trim_right_matches('.'), rpart))
+        Ok((lpart, dpart.trim_end_matches('.'), rpart))
     }
 
     /// Constructs a JID from its constituent parts. The localpart is generally the username of a

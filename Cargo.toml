@@ -22,7 +22,6 @@ exclude = [
 default = []
 
 try_from = []
-ascii_ctype = []
 
 [dependencies]
 idna = "0.1.4"

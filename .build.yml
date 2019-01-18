@@ -8,7 +8,6 @@ tasks:
       rustup toolchain install nightly stable
       cd xmpp-addr/
       rustup run stable cargo fetch
-      rustup run nightly cargo fetch
   - stable: |
       rustup default stable
       cd xmpp-addr/
