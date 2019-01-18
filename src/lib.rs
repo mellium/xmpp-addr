@@ -99,7 +99,7 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(feature = "try_from", feature(try_from))]
-#![doc(html_root_url = "https://docs.rs/xmpp-addr/0.13.0")]
+#![doc(html_root_url = "https://docs.rs/xmpp-addr/0.13.1")]
 
 use unicode_normalization::UnicodeNormalization;
 

@@ -25,6 +25,7 @@ tasks:
       rustup run nightly cargo doc --no-deps --all-features ||:
       rustup run stable cargo doc --no-deps
   - deploy: |
+      rustup default stable
       cd xmpp-addr/
       cargo package
       git describe --exact-match HEAD || complete-build
