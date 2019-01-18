@@ -15,4 +15,8 @@ tasks:
   - nightly: |
       rustup default nightly
       cd xmpp-addr/
-      cargo test --features=try_from,ascii_ctype
+      cargo test --features=try_from
+  - docs: |
+      cd xmpp-addr/
+      rustup run stable cargo doc --no-deps
+      rustup run nightly cargo doc --no-deps --all-features

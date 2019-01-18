@@ -410,7 +410,7 @@ impl<'a> Jid<'a> {
     ///
     /// # Errors
     ///
-    /// If domain fails the IDNA "to Unicode" operation, or is enclosed in square brackets ("[]")
+    /// If domain fails the IDNA "to Unicode" operation, or is enclosed in square brackets ("\[]")
     /// but is not a valid IPv6 address, this function returns an [error variant].
     ///
     /// [error variant]: ./enum.Error.html
