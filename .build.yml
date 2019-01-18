@@ -11,12 +11,14 @@ tasks:
   - stable: |
       rustup default stable
       cd xmpp-addr/
+      cargo build
       cargo test
   - nightly: |
       rustup default nightly
       cd xmpp-addr/
-      cargo test --features=try_from
+      cargo build --features=try_from ||:
+      cargo test --features=try_from  ||:
   - docs: |
       cd xmpp-addr/
+      rustup run nightly cargo doc --no-deps --all-features ||:
       rustup run stable cargo doc --no-deps
-      rustup run nightly cargo doc --no-deps --all-features
