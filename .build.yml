@@ -3,6 +3,8 @@ packages:
   - rustup
 sources:
   - https://github.com/mellium/xmpp-addr.git
+secrets:
+  - 054fae0e-53de-44e6-8e7a-e7eda822fbd4
 tasks:
   - setup: |
       rustup toolchain install nightly stable
@@ -22,3 +24,8 @@ tasks:
       cd xmpp-addr/
       rustup run nightly cargo doc --no-deps --all-features ||:
       rustup run stable cargo doc --no-deps
+  - deploy: |
+      cd xmpp-addr/
+      cargo package
+      git describe --exact-match HEAD || complete-build
+      cargo publish
