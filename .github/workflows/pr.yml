@@ -10,6 +10,6 @@ jobs:
     steps:
     - uses: superbrothers/auto-close-action@c9be55e32fb1bc2e40207afe5e103f891799334e
       with:
-        comment: "This repo is a mirror and does not accept PRs. See `README.md` and `CONTRIBUTING.md` for more information. Thanks for contributing!"
+        comment: "This repo is a mirror and does not accept PRs. See `README.md` for more information. Thanks for contributing!"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

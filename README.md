@@ -10,8 +10,7 @@ An implementation of [RFC 7622], the XMPP Address Format, more commonly known as
 Currently, due to Rust not having a [PRECIS] implementation, this package is not
 fully compliant with 7622.
 
-[RFC 7622]: https://tools.ietf.org/html/rfc7622
-[PRECIS]: https://tools.ietf.org/html/rfc7564
+If you'd like to contribute to the project, see [CONTRIBUTING.md].
 
 
 ## License
@@ -25,8 +24,14 @@ Licensed under either of
 
 at your option.
 
+
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
+
+
+[RFC 7622]: https://tools.ietf.org/html/rfc7622
+[PRECIS]: https://tools.ietf.org/html/rfc7564
+[CONTRIBUTING.md]: https://mellium.im/docs/CONTRIBUTING
